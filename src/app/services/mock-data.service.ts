@@ -366,28 +366,91 @@ export class MockDataService {
 
   private async syncWithPostgREST() {
     try {
+      // 1. Sync HITL Tasks
       const response = await fetch('http://localhost:3000/tareas_hitl?order=creado_at.desc');
-      if (!response.ok) return;
-      const data = await response.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const mappedTasks = data.map((t: any) => ({
-          id: t.id,
-          clientName: t.cliente_nombre,
-          clientSegment: t.cliente_segmento,
-          agentName: t.agente_nombre,
-          taskType: t.tipo_tarea,
-          description: t.descripcion,
-          originalValue: t.valor_original,
-          proposedValue: t.valor_propuesto,
-          confidence: t.confianza,
-          status: t.estado,
-          timeAgo: t.hace_cuanto,
-          operatorNotes: t.notas_operador || '',
-          ragDocUsed: t.documento_rag || '',
-          userSpeechAudio: !!t.audio_voz,
-          transcriptDialog: t.transcripcion_dialogo || ''
-        }));
-        this.hitlTasks.set(mappedTasks);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const mappedTasks = data.map((t: any) => ({
+            id: t.id,
+            clientName: t.cliente_nombre,
+            clientSegment: t.cliente_segmento,
+            agentName: t.agente_nombre,
+            taskType: t.tipo_tarea,
+            description: t.descripcion,
+            originalValue: t.valor_original,
+            proposedValue: t.valor_propuesto,
+            confidence: t.confianza,
+            status: t.estado,
+            timeAgo: t.hace_cuanto,
+            operatorNotes: t.notas_operador || '',
+            ragDocUsed: t.documento_rag || '',
+            userSpeechAudio: !!t.audio_voz,
+            transcriptDialog: t.transcripcion_dialogo || ''
+          }));
+          this.hitlTasks.set(mappedTasks);
+        }
+      }
+
+      // 2. Sync KPIs
+      const kpisResponse = await fetch('http://localhost:3000/dashboard_kpis?id=eq.1');
+      if (kpisResponse.ok) {
+        const kpisData = await kpisResponse.json();
+        if (Array.isArray(kpisData) && kpisData.length > 0) {
+          this.kpis.set({
+            activeConversations: kpisData[0].active_conversations,
+            firstContactResolution: kpisData[0].first_contact_resolution,
+            avgResponseTime: kpisData[0].avg_response_time,
+            humanEscalations: kpisData[0].human_escalations,
+            csat: kpisData[0].csat
+          });
+        }
+      }
+
+      // 3. Sync Agents
+      const agentsResponse = await fetch('http://localhost:3000/dashboard_agents');
+      if (agentsResponse.ok) {
+        const agentsData = await agentsResponse.json();
+        if (Array.isArray(agentsData) && agentsData.length > 0) {
+          this.internalAgents.set(agentsData.map((a: any) => ({
+            name: a.name,
+            domain: a.domain,
+            queriesToday: a.queries_today,
+            accuracy: a.accuracy,
+            latency: a.latency,
+            status: a.status
+          })));
+        }
+      }
+
+      // 4. Sync Integrations
+      const intResponse = await fetch('http://localhost:3000/dashboard_integrations');
+      if (intResponse.ok) {
+        const intData = await intResponse.json();
+        if (Array.isArray(intData) && intData.length > 0) {
+          this.externalIntegrations.set(intData.map((i: any) => ({
+            name: i.name,
+            type: i.type,
+            callsToday: i.calls_today,
+            success: i.success,
+            latency: i.latency,
+            status: i.status
+          })));
+        }
+      }
+
+      // 5. Sync Alerts
+      const alertsResponse = await fetch('http://localhost:3000/dashboard_alerts?order=created_at.desc');
+      if (alertsResponse.ok) {
+        const alertsData = await alertsResponse.json();
+        if (Array.isArray(alertsData) && alertsData.length > 0) {
+          this.alerts.set(alertsData.map((a: any) => ({
+            id: a.id,
+            severity: a.severity,
+            message: a.message,
+            timeAgo: a.time_ago
+          })));
+        }
       }
     } catch (e) {
       // Quietly fall back to mock data if PostgREST is not running
@@ -416,62 +479,11 @@ export class MockDataService {
     // Periodically pull live tasks from PostgREST if available
     setInterval(() => {
       this.syncWithPostgREST();
-    }, 5000);
-
-    // Start interval to auto-update metrics every 8 seconds
-    setInterval(() => {
-      this.updateKPIMetrics();
-    }, 8000);
+    }, 2000); // Poll more frequently for snappiness
   }
 
   public getClientProfiles(): ClientProfile[] {
     return this.profiles;
-  }
-
-  private updateKPIMetrics() {
-    this.kpis.update((kpi) => {
-      // Add ±random variation of max 5%
-      const variation = () => (Math.random() - 0.5) * 0.05;
-      
-      const activeConversations = Math.max(1000, Math.round(kpi.activeConversations * (1 + variation() * 0.5)));
-      const firstContactResolution = Math.min(100, Math.max(70, Math.round(kpi.firstContactResolution * (1 + variation() * 0.2))));
-      const avgResponseTime = Math.max(0.5, Math.round((kpi.avgResponseTime * (1 + variation())) * 10) / 10);
-      const humanEscalations = Math.min(50, Math.max(5, Math.round(kpi.humanEscalations * (1 + variation() * 0.3))));
-      const csat = Math.min(5.0, Math.max(3.5, Math.round((kpi.csat * (1 + variation() * 0.1)) * 10) / 10));
-
-      return {
-        activeConversations,
-        firstContactResolution,
-        avgResponseTime,
-        humanEscalations,
-        csat,
-      };
-    });
-
-    // Also slightly randomize queries and latency of agents for rich live feeling
-    this.internalAgents.update((agents) => {
-      return agents.map((agent) => {
-        const queryDiff = Math.floor(Math.random() * 5) + 1;
-        const newAccuracy = Math.min(100, Math.max(80, agent.accuracy + (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0)));
-        return {
-          ...agent,
-          queriesToday: agent.queriesToday + queryDiff,
-          accuracy: newAccuracy
-        };
-      });
-    });
-
-    this.externalIntegrations.update((integrations) => {
-      return integrations.map((int) => {
-        const callsDiff = Math.floor(Math.random() * 4) + 1;
-        const successRate = Math.min(100, Math.max(90, int.success + (Math.random() > 0.95 ? (Math.random() > 0.5 ? 1 : -1) : 0)));
-        return {
-          ...int,
-          callsToday: int.callsToday + callsDiff,
-          success: successRate
-        };
-      });
-    });
   }
 
   // Toggle state of an offer

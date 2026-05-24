@@ -130,20 +130,38 @@
         </div>
 
         <!-- Formulario -->
-        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto pr-2" [ngClass]="{'opacity-80 pointer-events-none': isGeneratingAI()}">
           
+          <!-- Banner Inteligencia Artificial -->
+          <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+            <div>
+              <p class="text-xs font-black text-indigo-900 flex items-center gap-1.5">
+                <span>✨</span> Asistente Copilot
+              </p>
+              <p class="text-3xs text-indigo-700 mt-0.5 leading-tight">Genera ofertas persuasivas automáticamente según el segmento objetivo elegido.</p>
+            </div>
+            <button (click)="generateAISuggestion()" 
+                    [disabled]="isGeneratingAI()"
+                    class="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+              <span *ngIf="isGeneratingAI()" class="animate-spin text-sm">↻</span>
+              <span *ngIf="!isGeneratingAI()">Generar con IA</span>
+            </button>
+          </div>
+
           <!-- Título -->
-          <div class="space-y-1.5">
+          <div class="space-y-1.5 relative">
             <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Título de la Oferta (Banco / Olímpica)</label>
             <input type="text" [(ngModel)]="newOfferTitle" placeholder="Ej. 🥩 25% Viernes de Carnes"
-                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C] transition-all"
+                   [ngClass]="{'ring-2 ring-indigo-400 border-indigo-400 bg-indigo-50/30': isGeneratingAI()}" />
           </div>
 
           <!-- Descripción -->
-          <div class="space-y-1.5">
+          <div class="space-y-1.5 relative">
             <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Descripción Comercial</label>
-            <textarea [(ngModel)]="newOfferDesc" rows="2" placeholder="Describe los beneficios y condiciones para el cliente..."
-                      class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]"></textarea>
+            <textarea [(ngModel)]="newOfferDesc" rows="3" placeholder="Describe los beneficios y condiciones para el cliente..."
+                      class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C] transition-all resize-none"
+                      [ngClass]="{'ring-2 ring-indigo-400 border-indigo-400 bg-indigo-50/30': isGeneratingAI()}"></textarea>
           </div>
 
           <!-- Segmento Objetivo -->
@@ -171,10 +189,11 @@
           </div>
 
           <!-- Trigger / Condición -->
-          <div class="space-y-1.5">
+          <div class="space-y-1.5 relative">
             <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Trigger de Activación (Lógica)</label>
             <input type="text" [(ngModel)]="newOfferTrigger" placeholder="Ej. Compras en Olímpica > 3 veces el último mes"
-                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C] transition-all"
+                   [ngClass]="{'ring-2 ring-indigo-400 border-indigo-400 bg-indigo-50/30': isGeneratingAI()}" />
           </div>
 
           <!-- Prioridad y Estado Activo -->

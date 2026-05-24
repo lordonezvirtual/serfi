@@ -1,0 +1,340 @@
+<div class="h-full flex flex-col space-y-6">
+  
+  <!-- Encabezado de la Sección -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#1E4D8C] to-indigo-600">
+          Orquestación de Agentes
+        </span>
+        <span class="text-xl">🤖</span>
+      </h1>
+      <p class="text-sm font-medium text-slate-500 mt-1">
+        Supervisa, configura y orquesta la colmena de los 6 agentes autónomos cognitivos.
+      </p>
+    </div>
+    <div class="flex flex-wrap sm:flex-nowrap gap-3">
+      <button class="w-full sm:w-auto bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-all hover:bg-slate-50">
+        Re-entrenar Todos
+      </button>
+      <button (click)="openCreateAgent()" class="w-full sm:w-auto bg-gradient-to-r from-[#1E4D8C] to-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all hover:scale-105 cursor-pointer text-center">
+        + Nuevo Agente
+      </button>
+    </div>
+  </div>
+
+  <!-- Alerta de Notificaciones -->
+  @if (actionAlert()) {
+    <div class="p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-between text-xs font-semibold animate-pulse shadow-sm">
+      <span>{{ actionAlert() }}</span>
+      <button (click)="actionAlert.set(null)" class="text-slate-400 hover:text-slate-600 text-sm cursor-pointer">✕</button>
+    </div>
+  }
+
+  <!-- Vista General / Métricas Globales -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+      <div class="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner">
+        🧠
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Agentes Activos</p>
+        <p class="text-2xl font-black text-slate-800">5 <span class="text-sm text-slate-400 font-medium">/ 6</span></p>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+      <div class="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+        ⚡
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tareas Hoy</p>
+        <p class="text-2xl font-black text-slate-800">18.4K</p>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+      <div class="h-12 w-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner">
+        🎯
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Precisión (Avg)</p>
+        <p class="text-2xl font-black text-slate-800">95.3%</p>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+      <div class="h-12 w-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner">
+        ⏱️
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Latencia Media</p>
+        <p class="text-2xl font-black text-slate-800">1.2s</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid de Agentes -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 flex-1 overflow-y-auto pb-6 pr-2">
+    @for (agent of agents(); track agent.id) {
+      <div class="group relative bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
+        <!-- Decoración Superior -->
+        <div class="h-2 w-full bg-gradient-to-r {{agent.color}}"></div>
+        
+        <div class="p-6 flex-1 flex flex-col">
+          <!-- Cabecera Tarjeta -->
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner bg-slate-50 border border-slate-100 group-hover:scale-110 transition-transform duration-300">
+                {{agent.icon}}
+              </div>
+              <div>
+                <h3 class="font-black text-slate-800 leading-tight">{{agent.name}}</h3>
+                <p class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider mt-0.5">{{agent.role}}</p>
+              </div>
+            </div>
+            
+            <!-- Badge Estado -->
+            <div class="px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5"
+                 [ngClass]="{
+                   'bg-emerald-50 text-emerald-600 border border-emerald-100': agent.status === 'active',
+                   'bg-slate-50 text-slate-500 border border-slate-200': agent.status === 'inactive',
+                   'bg-amber-50 text-amber-600 border border-amber-100': agent.status === 'training',
+                   'bg-red-50 text-red-600 border border-red-100': agent.status === 'error'
+                 }">
+              <span class="relative flex h-1.5 w-1.5" *ngIf="agent.status === 'active' || agent.status === 'training'">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                      [ngClass]="agent.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5"
+                      [ngClass]="agent.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+              </span>
+              {{ agent.status === 'active' ? 'En Línea' : agent.status === 'training' ? 'Entrenando' : 'Inactivo' }}
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          <p class="text-xs text-slate-500 leading-relaxed mb-6 grow">
+            {{agent.description}}
+          </p>
+
+          <!-- Divider -->
+          <div class="h-px w-full bg-slate-100 mb-4"></div>
+
+          <!-- Metadatos -->
+          <div class="grid grid-cols-2 gap-4 mb-5">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Modelo LLM</p>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">{{agent.model}}</span>
+              </div>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tasa de Éxito</p>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-black text-emerald-600">{{agent.successRate}}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón de Acción -->
+          <button (click)="openConfig(agent)" 
+                  class="w-full py-2.5 mt-auto shrink-0 rounded-xl text-sm font-bold border-2 border-slate-100 text-slate-600 group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-colors duration-300">
+            Configurar Prompt & Parámetros
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- MODAL DE CONFIGURACIÓN DE AGENTE -->
+  @if (showConfigModal() && selectedAgent()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" (click)="closeConfig()"></div>
+      
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col overflow-hidden animate-fade-in">
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+          <div class="flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-2xl">
+              {{selectedAgent()?.icon}}
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-slate-800">Configuración: {{selectedAgent()?.name}}</h2>
+              <p class="text-xs font-bold text-slate-500">{{selectedAgent()?.role}}</p>
+            </div>
+          </div>
+          <button (click)="closeConfig()" class="text-slate-400 hover:text-slate-600 p-2">
+            ✕
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-6 flex-1 overflow-y-auto">
+          
+          <!-- Fila: Modelo y Temperatura -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Modelo Base (LLM)</label>
+              <select [(ngModel)]="editModel" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none appearance-none bg-slate-50 cursor-pointer">
+                <option value="gpt-4o">OpenAI GPT-4o</option>
+                <option value="gpt-4o-mini">OpenAI GPT-4o-mini</option>
+                <option value="claude-3-5-sonnet">Anthropic Claude 3.5 Sonnet</option>
+                <option value="xgboost-ensemble">XGBoost Ensemble (Local ML)</option>
+              </select>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider flex justify-between">
+                <span>Temperatura</span>
+                <span class="text-blue-600">{{editTemperature | number:'1.1-1'}}</span>
+              </label>
+              <input type="range" min="0" max="1" step="0.1" [(ngModel)]="editTemperature" 
+                     class="w-full accent-blue-600 mt-2">
+              <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+                <span>Determinista (0.0)</span>
+                <span>Creativo (1.0)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fila: System Prompt -->
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              System Prompt (Instrucciones Base)
+            </label>
+            <textarea [(ngModel)]="editSystemPrompt" rows="5" 
+                      class="w-full border border-slate-200 rounded-xl p-4 text-sm font-mono text-slate-600 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                      placeholder="Escribe las instrucciones para el LLM..."></textarea>
+            <p class="text-[10px] text-slate-500 mt-1">Este prompt define la personalidad, restricciones y conocimientos a los que tiene acceso el agente en el grafo.</p>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-6 border-t border-slate-100 flex justify-end gap-3 bg-white">
+          <button (click)="closeConfig()" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors text-sm">
+            Cancelar
+          </button>
+          <button (click)="saveConfig()" class="px-5 py-2.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-black shadow-lg transition-all text-sm flex items-center gap-2">
+            <span>Guardar Configuración</span>
+            <span class="text-xs">💾</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL DE CREACIÓN DE AGENTE -->
+  @if (showCreateAgentModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" (click)="closeCreateAgent()"></div>
+      
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col overflow-hidden animate-fade-in max-h-[90vh]">
+        
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+          <div>
+            <h2 class="text-lg font-black text-slate-800">Desplegar Nuevo Agente AI</h2>
+            <p class="text-xs font-bold text-slate-500">Agrega un nuevo nodo a la colmena cognitiva</p>
+          </div>
+          <button (click)="closeCreateAgent()" class="text-slate-400 hover:text-slate-600 p-2 cursor-pointer">
+            ✕
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-6 overflow-y-auto" [ngClass]="{'opacity-80 pointer-events-none': isGeneratingAIAgent()}">
+          
+          <!-- Banner IA Suggestion -->
+          <div class="bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+            <div>
+              <p class="text-xs font-black text-cyan-900 flex items-center gap-1.5">
+                <span>✨</span> OpenAI Agent Builder
+              </p>
+              <p class="text-3xs text-cyan-700 mt-0.5 leading-tight">Genera perfiles de agentes bancarios especializados automáticamente.</p>
+            </div>
+            <button (click)="generateAIAgentSuggestion()" 
+                    [disabled]="isGeneratingAIAgent()"
+                    class="shrink-0 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold py-2 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer">
+              <span *ngIf="isGeneratingAIAgent()" class="animate-spin text-sm">↻</span>
+              <span *ngIf="!isGeneratingAIAgent()">Sugerir con IA</span>
+            </button>
+          </div>
+
+          <!-- Campos: Nombre, Rol, Icono -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+            <div class="sm:col-span-2 space-y-1.5 relative">
+              <label class="block text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">Icono</label>
+              <input type="text" [(ngModel)]="newAgentIcon" placeholder="🤖"
+                     class="w-full text-center bg-white border border-slate-200 rounded-xl px-2 py-2 text-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
+                     [ngClass]="{'ring-2 ring-cyan-400 border-cyan-400 bg-cyan-50/30': isGeneratingAIAgent()}" />
+            </div>
+            <div class="sm:col-span-5 space-y-1.5 relative">
+              <label class="block text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">Nombre del Agente</label>
+              <input type="text" [(ngModel)]="newAgentName" placeholder="Ej. Analista Anti-Fraude"
+                     class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
+                     [ngClass]="{'ring-2 ring-cyan-400 border-cyan-400 bg-cyan-50/30': isGeneratingAIAgent()}" />
+            </div>
+            <div class="sm:col-span-5 space-y-1.5 relative">
+              <label class="block text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">Rol / Especialidad</label>
+              <input type="text" [(ngModel)]="newAgentRole" placeholder="Ej. Auditor Transaccional"
+                     class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
+                     [ngClass]="{'ring-2 ring-cyan-400 border-cyan-400 bg-cyan-50/30': isGeneratingAIAgent()}" />
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          <div class="space-y-1.5 relative">
+            <label class="block text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">Descripción Breve</label>
+            <textarea [(ngModel)]="newAgentDesc" rows="2" placeholder="Explica la misión del agente..."
+                      class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all resize-none"
+                      [ngClass]="{'ring-2 ring-cyan-400 border-cyan-400 bg-cyan-50/30': isGeneratingAIAgent()}"></textarea>
+          </div>
+
+          <!-- Fila: Modelo y Temperatura -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="space-y-2 relative">
+              <label class="block text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">Modelo Base (LLM)</label>
+              <select [(ngModel)]="newAgentModel" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:ring-2 focus:ring-cyan-500 outline-none appearance-none bg-slate-50 cursor-pointer transition-all"
+                      [ngClass]="{'ring-2 ring-cyan-400 border-cyan-400 bg-cyan-50/30': isGeneratingAIAgent()}">
+                <option value="gpt-4o">OpenAI GPT-4o</option>
+                <option value="gpt-4o-mini">OpenAI GPT-4o-mini</option>
+                <option value="claude-3-5-sonnet">Anthropic Claude 3.5</option>
+              </select>
+            </div>
+            
+            <div class="space-y-2 relative">
+              <label class="block text-[10px] font-extrabold text-slate-600 uppercase tracking-wider flex justify-between">
+                <span>Temperatura</span>
+                <span class="text-cyan-600">{{newAgentTemp | number:'1.1-1'}}</span>
+              </label>
+              <input type="range" min="0" max="1" step="0.1" [(ngModel)]="newAgentTemp" 
+                     class="w-full accent-cyan-600 mt-2 transition-all" [disabled]="isGeneratingAIAgent()">
+            </div>
+          </div>
+
+          <!-- System Prompt -->
+          <div class="space-y-1.5 relative">
+            <label class="block text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">
+              System Prompt (Instrucciones)
+            </label>
+            <textarea [(ngModel)]="newAgentPrompt" rows="4" 
+                      class="w-full border border-slate-200 rounded-xl p-4 text-xs font-mono text-slate-600 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cyan-500 outline-none resize-none transition-all"
+                      placeholder="Escribe las instrucciones para el LLM..."
+                      [ngClass]="{'ring-2 ring-cyan-400 border-cyan-400 bg-cyan-50/30': isGeneratingAIAgent()}"></textarea>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-6 border-t border-slate-100 flex justify-end gap-3 bg-white">
+          <button (click)="closeCreateAgent()" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors text-sm cursor-pointer">
+            Cancelar
+          </button>
+          <button (click)="saveNewAgent()" 
+                  [disabled]="!newAgentName || !newAgentRole || isGeneratingAIAgent()"
+                  class="px-5 py-2.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-black shadow-lg transition-all text-sm flex items-center gap-2 cursor-pointer disabled:opacity-50">
+            <span>Desplegar Agente</span>
+            <span class="text-xs">🚀</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

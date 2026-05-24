@@ -24,6 +24,10 @@ export class App implements OnInit {
   protected readonly apiKey = this.claudeService.apiKey;
   protected readonly forceFallback = this.claudeService.forceFallback;
 
+  // Sidebar state
+  protected isSidebarCollapsed = signal<boolean>(false);
+  protected isMobileMenuOpen = signal<boolean>(false);
+
   ngOnInit() {
     this.apiKeyInput = this.apiKey();
   }
@@ -60,5 +64,18 @@ export class App implements OnInit {
   // Toggle force simulation fallback for demo testing
   protected toggleForceFallback() {
     this.claudeService.forceFallback.update(val => !val);
+  }
+
+  // Sidebar toggle methods
+  protected toggleSidebar() {
+    this.isSidebarCollapsed.update(v => !v);
+  }
+
+  protected toggleMobileMenu() {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  protected closeMobileMenu() {
+    this.isMobileMenuOpen.set(false);
   }
 }

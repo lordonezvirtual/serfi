@@ -33,6 +33,36 @@ export class OffersComponent implements OnInit, AfterViewInit {
   protected newOfferPriority = 3;
   protected newOfferActive = true;
 
+  // AI Suggestions
+  protected isGeneratingAI = signal<boolean>(false);
+
+  protected generateAISuggestion() {
+    if (this.isGeneratingAI()) return;
+    this.isGeneratingAI.set(true);
+
+    // Simulate ChatGPT delay and generate content based on the selected segment
+    setTimeout(() => {
+      if (this.newOfferSegment.includes('Ahorradores')) {
+        this.newOfferTitle = '¡Multiplica tus Ahorros con CDT!';
+        this.newOfferDesc = 'Notamos que tienes un buen saldo en tu cuenta. ¿Sabías que con nuestro CDT Serfinanza puedes ganar hasta un 12% E.A.? Ábrelo hoy 100% digital y sin papeleos.';
+        this.newOfferTrigger = 'Saldo promedio > $2M COP en los últimos 3 meses';
+      } else if (this.newOfferSegment.includes('Olímpica')) {
+        this.newOfferTitle = '20% OFF en Carnes Olímpica 🥩';
+        this.newOfferDesc = 'Por ser cliente frecuente de Supertiendas Olímpica, te regalamos un 20% de descuento en la sección de carnes pagando con tu Tarjeta Olímpica MasterCard. ¡Aprovecha este fin de semana!';
+        this.newOfferTrigger = 'Transacción detectada en Supertiendas Olímpica';
+      } else if (this.newOfferSegment.includes('Adulto')) {
+        this.newOfferTitle = 'Te asistimos por WhatsApp, Sin Salir de Casa';
+        this.newOfferDesc = 'Hola. Queremos facilitarte la vida. Si necesitas revisar tu saldo o pagar tu tarjeta, puedes hacerlo enviando un mensaje por aquí. Es seguro, fácil y no necesitas contraseñas complicadas.';
+        this.newOfferTrigger = 'Cliente inactivo en App móvil por más de 30 días';
+      } else {
+        this.newOfferTitle = 'Beneficio Exclusivo para Ti 🌟';
+        this.newOfferDesc = 'Descubre esta oferta especial que hemos diseñado basándonos en tu historial con nosotros. Activa tu beneficio directamente desde este chat con un solo clic.';
+        this.newOfferTrigger = 'Análisis de sentimiento positivo en interacciones previas';
+      }
+      this.isGeneratingAI.set(false);
+    }, 1500);
+  }
+
   @ViewChild('conversionChart') private conversionChartRef!: ElementRef<HTMLCanvasElement>;
   private chartInstance?: Chart;
 

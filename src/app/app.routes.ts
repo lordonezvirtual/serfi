@@ -26,6 +26,10 @@ export const routes: Routes = [
     loadComponent: () => import('./views/geomarketing/geomarketing').then((m) => m.GeomarketingComponent),
   },
   {
+    path: 'agents-orchestration',
+    loadComponent: () => import('./views/agents-orchestration/agents-orchestration').then((m) => m.AgentsOrchestrationComponent),
+  },
+  {
     path: '',
     redirectTo: '/dashboard',
     pathMatch: 'full',

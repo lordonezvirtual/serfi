@@ -174,7 +174,16 @@ def run_orquestador(state: Dict[str, Any]) -> Dict[str, Any]:
 
 def run_banca(state: Dict[str, Any]) -> Dict[str, Any]:
     messages = state.get("messages", [])
-    response = llm.invoke([SystemMessage(content=SYSTEM_PROMPTS["banca"])] + messages)
+    client_id = state.get("client_id", "maria")
+    
+    txs = query_client_transactions.invoke(client_id)
+    sys_prompt = SYSTEM_PROMPTS["banca"] + f"\n\n[CONTEXTO BASE DE DATOS PARA EL CLIENTE {client_id}]:\n{txs}"
+    if client_id == "maria":
+        sys_prompt += "\nSaldos: Cuenta Ahorros $2,540,000 COP. Tarjeta Crédito Olímpica: Cupo $2M, Utilizado $450K, Disponible $1,550,000 COP."
+    else:
+        sys_prompt += "\nSaldos: Cuenta Ahorros $850,000 COP. Tarjeta Crédito: Cupo $5M, Utilizado $3,250K, Disponible $1,750,000 COP."
+        
+    response = llm.invoke([SystemMessage(content=sys_prompt)] + messages)
     return {
         "messages": messages + [response],
         "next_agent": None
@@ -182,7 +191,11 @@ def run_banca(state: Dict[str, Any]) -> Dict[str, Any]:
 
 def run_perfil(state: Dict[str, Any]) -> Dict[str, Any]:
     messages = state.get("messages", [])
-    response = llm.invoke([SystemMessage(content=SYSTEM_PROMPTS["perfil"])] + messages)
+    client_id = state.get("client_id", "maria")
+    scoring = calculate_credit_scoring.invoke(client_id)
+    
+    sys_prompt = SYSTEM_PROMPTS["perfil"] + f"\n\n[DATOS DEL CRM Y SCORING]:\n{scoring}"
+    response = llm.invoke([SystemMessage(content=sys_prompt)] + messages)
     
     # Simulación de gatillo de tarea HITL
     hitl_requested = False
@@ -211,7 +224,17 @@ def run_perfil(state: Dict[str, Any]) -> Dict[str, Any]:
 
 def run_portafolio(state: Dict[str, Any]) -> Dict[str, Any]:
     messages = state.get("messages", [])
-    response = llm.invoke([SystemMessage(content=SYSTEM_PROMPTS["portafolio"])] + messages)
+    
+    last_user_msg = ""
+    for m in reversed(messages):
+        if isinstance(m, HumanMessage):
+            last_user_msg = m.content
+            break
+            
+    rag_info = search_knowledge_base.invoke({"query": last_user_msg, "category": "Productos bancarios"})
+    sys_prompt = SYSTEM_PROMPTS["portafolio"] + f"\n\n[BASE DE CONOCIMIENTOS - RAG]:\n{rag_info}"
+    
+    response = llm.invoke([SystemMessage(content=sys_prompt)] + messages)
     
     # Simulación de gatillo de tarea HITL
     hitl_requested = False
@@ -240,7 +263,10 @@ def run_portafolio(state: Dict[str, Any]) -> Dict[str, Any]:
 
 def run_retail(state: Dict[str, Any]) -> Dict[str, Any]:
     messages = state.get("messages", [])
-    response = llm.invoke([SystemMessage(content=SYSTEM_PROMPTS["retail"])] + messages)
+    promos = get_active_promotions.invoke({"day_of_week": "Sábado", "segment": "Adulto Mayor"})
+    
+    sys_prompt = SYSTEM_PROMPTS["retail"] + f"\n\n[PROMOCIONES ACTIVAS]:\n{promos}"
+    response = llm.invoke([SystemMessage(content=sys_prompt)] + messages)
     
     hitl_requested = False
     hitl_task = None

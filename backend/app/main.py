@@ -402,6 +402,9 @@ Escribe únicamente la traducción amigable, lista para ser enviada por WhatsApp
 
 # --- TWILIO WHATSAPP WEBHOOK ---
 
+# In-memory dictionary for Twilio sessions (WhatsApp history)
+twilio_sessions = {}
+
 @app.post("/api/webhooks/twilio")
 async def twilio_webhook(request: Request):
     form_data = await request.form()
@@ -417,7 +420,21 @@ async def twilio_webhook(request: Request):
     # Para simplicidad en este canal, pasaremos directo al orquestador o 
     # se podría invocar el endpoint de biometría si hubiese datos
     
-    messages = [HumanMessage(content=incoming_msg)]
+    # Recuperar historial
+    history = twilio_sessions.get(client_id, [])
+    
+    messages = []
+    for msg in history:
+        if msg.get("sender") == "user":
+            messages.append(HumanMessage(content=msg.get("text", "")))
+        else:
+            messages.append(AIMessage(content=msg.get("text", "")))
+            
+    # Añadir mensaje actual
+    messages.append(HumanMessage(content=incoming_msg))
+    
+    # Añadir el actual a la sesión en memoria
+    history.append({"sender": "user", "text": incoming_msg})
     
     state_input = {
         "messages": messages,
@@ -432,6 +449,40 @@ async def twilio_webhook(request: Request):
         final_state = compiled_graph.invoke(state_input)
         response_messages = final_state.get("messages", [])
         last_response = response_messages[-1].content if response_messages else "Lo siento, no pude procesar la solicitud."
+        
+        # Guardar respuesta del bot en la sesión
+        history.append({"sender": "bot", "text": last_response})
+        twilio_sessions[client_id] = history
+        
+        active_agent = final_state.get("next_agent") or "Orquestador Central"
+        
+        # --- ACTUALIZAR DASHBOARD EN BASE DE DATOS ---
+        try:
+            conn = db_service.get_connection()
+            cursor = conn.cursor()
+            if db_service.mode == "postgres":
+                cursor.execute("""
+                    UPDATE api.dashboard_kpis 
+                    SET active_conversations = active_conversations + 1,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = 1
+                """)
+                cursor.execute("""
+                    UPDATE api.dashboard_integrations
+                    SET calls_today = calls_today + 1
+                    WHERE name = 'WhatsApp Business API'
+                """)
+                cursor.execute("""
+                    UPDATE api.dashboard_agents
+                    SET queries_today = queries_today + 1
+                    WHERE name = %s
+                """, (active_agent,))
+                conn.commit()
+            cursor.close()
+            conn.close()
+        except Exception as db_err:
+            print(f"Error actualizando métricas del dashboard desde Twilio: {db_err}")
+            
     except Exception as e:
         print(f"Error procesando mensaje de WhatsApp: {e}")
         last_response = "En este momento estamos experimentando intermitencias. Por favor intente en unos minutos."

@@ -1,73 +1,127 @@
 <div class="flex h-screen bg-[#F8FAFC] font-sans antialiased overflow-hidden">
   
+  <!-- Fondo oscuro para menú móvil -->
+  @if (isMobileMenuOpen()) {
+    <div class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm md:hidden" (click)="closeMobileMenu()"></div>
+  }
+
   <!-- BARRA LATERAL (SIDEBAR): Menú de Navegación Principal (Fondo #0F172A) -->
-  <aside class="hidden md:flex md:flex-col md:w-64 bg-[#0F172A] text-slate-400 shrink-0 shadow-xl border-r border-slate-800">
+  <aside class="fixed md:static inset-y-0 left-0 z-50 flex flex-col bg-[#0F172A] text-slate-400 shrink-0 shadow-xl border-r border-slate-800 transition-all duration-300"
+         [ngClass]="{
+           'translate-x-0 w-64': isMobileMenuOpen(),
+           '-translate-x-full md:translate-x-0': !isMobileMenuOpen(),
+           'md:w-20': isSidebarCollapsed() && !isMobileMenuOpen(),
+           'md:w-64': !isSidebarCollapsed() && !isMobileMenuOpen()
+         }">
     <!-- Logotipo Corporativo -->
-    <div class="h-20 flex items-center px-6 border-b border-slate-800">
-      <div class="flex flex-col">
+    <div class="h-20 flex items-center border-b border-slate-800 shrink-0 overflow-hidden"
+         [ngClass]="{'px-6': !isSidebarCollapsed() || isMobileMenuOpen(), 'px-0 justify-center': isSidebarCollapsed() && !isMobileMenuOpen()}">
+      <div class="flex flex-col" [ngClass]="{'hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">
         <div class="flex items-baseline space-x-1">
           <span class="text-white font-extrabold text-lg">Banco</span>
           <span class="text-[#C00000] font-black text-xl tracking-tight">Serfinanza</span>
         </div>
         <span class="text-slate-500 font-extrabold text-[10px] uppercase tracking-widest mt-0.5">Plataforma Agente 360</span>
       </div>
+      <!-- Icono mínimo -->
+      <div class="flex items-center justify-center text-[#C00000] text-3xl font-black shrink-0" 
+           [ngClass]="{'hidden': !isSidebarCollapsed() || isMobileMenuOpen()}" title="Serfinanza">
+        S
+      </div>
     </div>
 
     <!-- Enlaces de Navegación -->
     <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
       <!-- 1. Dashboard -->
-      <a routerLink="/dashboard" 
+      <a routerLink="/dashboard" (click)="closeMobileMenu()"
          routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
-         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group">
-        <span class="text-lg">📊</span>
-        <span class="text-xs">Consola de Control</span>
+         class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group"
+         [ngClass]="{'justify-center': isSidebarCollapsed() && !isMobileMenuOpen(), 'space-x-3': !isSidebarCollapsed() || isMobileMenuOpen()}"
+         [title]="(isSidebarCollapsed() && !isMobileMenuOpen()) ? 'Consola de Control' : ''">
+        <span class="text-lg shrink-0">📊</span>
+        <span class="text-xs whitespace-nowrap overflow-hidden transition-all duration-300" 
+              [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Consola de Control</span>
       </a>
 
       <!-- 2. Chat Simulator -->
-      <a routerLink="/chat" 
+      <a routerLink="/chat" (click)="closeMobileMenu()"
          routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
-         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group">
-        <span class="text-lg">💬</span>
-        <span class="text-xs">Simulador de Chat</span>
+         class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group"
+         [ngClass]="{'justify-center': isSidebarCollapsed() && !isMobileMenuOpen(), 'space-x-3': !isSidebarCollapsed() || isMobileMenuOpen()}"
+         [title]="(isSidebarCollapsed() && !isMobileMenuOpen()) ? 'Simulador de Chat' : ''">
+        <span class="text-lg shrink-0">💬</span>
+        <span class="text-xs whitespace-nowrap overflow-hidden transition-all duration-300" 
+              [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Simulador de Chat</span>
       </a>
 
       <!-- 3. Channels -->
-      <a routerLink="/channels" 
+      <a routerLink="/channels" (click)="closeMobileMenu()"
          routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
-         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group">
-        <span class="text-lg">🔌</span>
-        <span class="text-xs">Gestión de Canales</span>
+         class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group"
+         [ngClass]="{'justify-center': isSidebarCollapsed() && !isMobileMenuOpen(), 'space-x-3': !isSidebarCollapsed() || isMobileMenuOpen()}"
+         [title]="(isSidebarCollapsed() && !isMobileMenuOpen()) ? 'Gestión de Canales' : ''">
+        <span class="text-lg shrink-0">🔌</span>
+        <span class="text-xs whitespace-nowrap overflow-hidden transition-all duration-300" 
+              [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Gestión de Canales</span>
       </a>
 
       <!-- 4. Knowledge Base -->
-      <a routerLink="/knowledge" 
+      <a routerLink="/knowledge" (click)="closeMobileMenu()"
          routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
-         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group">
-        <span class="text-lg">📁</span>
-        <span class="text-xs">Base de RAG</span>
+         class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group"
+         [ngClass]="{'justify-center': isSidebarCollapsed() && !isMobileMenuOpen(), 'space-x-3': !isSidebarCollapsed() || isMobileMenuOpen()}"
+         [title]="(isSidebarCollapsed() && !isMobileMenuOpen()) ? 'Base de RAG' : ''">
+        <span class="text-lg shrink-0">📁</span>
+        <span class="text-xs whitespace-nowrap overflow-hidden transition-all duration-300" 
+              [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Base de RAG</span>
       </a>
 
       <!-- 5. Offers Engine -->
-      <a routerLink="/offers" 
+      <a routerLink="/offers" (click)="closeMobileMenu()"
          routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
-         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group">
-        <span class="text-lg">🏷️</span>
-        <span class="text-xs">Motor de Ofertas</span>
+         class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group"
+         [ngClass]="{'justify-center': isSidebarCollapsed() && !isMobileMenuOpen(), 'space-x-3': !isSidebarCollapsed() || isMobileMenuOpen()}"
+         [title]="(isSidebarCollapsed() && !isMobileMenuOpen()) ? 'Motor de Ofertas' : ''">
+        <span class="text-lg shrink-0">🏷️</span>
+        <span class="text-xs whitespace-nowrap overflow-hidden transition-all duration-300" 
+              [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Motor de Ofertas</span>
       </a>
 
       <!-- 6. Geomarketing GIS -->
-      <a routerLink="/geomarketing" 
+      <a routerLink="/geomarketing" (click)="closeMobileMenu()"
          routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
-         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group">
-        <span class="text-lg">🗺️</span>
-        <span class="text-xs">Geomarketing Olímpica</span>
+         class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group"
+         [ngClass]="{'justify-center': isSidebarCollapsed() && !isMobileMenuOpen(), 'space-x-3': !isSidebarCollapsed() || isMobileMenuOpen()}"
+         [title]="(isSidebarCollapsed() && !isMobileMenuOpen()) ? 'Geomarketing Olímpica' : ''">
+        <span class="text-lg shrink-0">🗺️</span>
+        <span class="text-xs whitespace-nowrap overflow-hidden transition-all duration-300" 
+              [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Geomarketing Olímpica</span>
+      </a>
+
+      <!-- 7. Agents Orchestration -->
+      <a routerLink="/agents-orchestration" (click)="closeMobileMenu()"
+         routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
+         class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group"
+         [ngClass]="{'justify-center': isSidebarCollapsed() && !isMobileMenuOpen(), 'space-x-3': !isSidebarCollapsed() || isMobileMenuOpen()}"
+         [title]="(isSidebarCollapsed() && !isMobileMenuOpen()) ? 'Orquestación Agentes' : ''">
+        <span class="text-lg shrink-0">🤖</span>
+        <span class="text-xs whitespace-nowrap overflow-hidden transition-all duration-300" 
+              [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Orquestación Agentes</span>
       </a>
     </nav>
 
     <!-- Footer Sidebar: Info de Hackathon -->
-    <div class="p-4 border-t border-slate-800 bg-slate-950/40 text-center">
-      <p class="text-4xs uppercase tracking-widest text-slate-500 font-extrabold">Hackathon Demo</p>
-      <p class="text-3xs text-slate-400 font-semibold mt-1">Banco Serfinanza v1.0.0</p>
+    <div class="mt-auto border-t border-slate-800 bg-slate-950/40 flex flex-col">
+      <!-- Collapse toggle btn -->
+      <button class="hidden md:flex p-3 w-full items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer border-b border-slate-800"
+              (click)="toggleSidebar()" title="Alternar Menú">
+        <span *ngIf="!isSidebarCollapsed()">◀ Contraer Menú</span>
+        <span *ngIf="isSidebarCollapsed()">▶</span>
+      </button>
+      <div class="p-4 text-center overflow-hidden" [ngClass]="{'hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">
+        <p class="text-4xs uppercase tracking-widest text-slate-500 font-extrabold whitespace-nowrap">Hackathon Demo</p>
+        <p class="text-3xs text-slate-400 font-semibold mt-1 whitespace-nowrap">Banco Serfinanza v1.0.0</p>
+      </div>
     </div>
   </aside>
 
@@ -78,7 +132,15 @@
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm z-30">
       
       <!-- Logo en Móviles / Título en Escritorio -->
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-3 md:space-x-4">
+        <!-- Menu toggle mobile -->
+        <button class="md:hidden p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors" 
+                (click)="toggleMobileMenu()" aria-label="Abrir Menú">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+
         <!-- Logo Mobile -->
         <div class="md:hidden flex items-baseline space-x-1">
           <span class="text-slate-900 font-extrabold text-sm">Banco</span>
