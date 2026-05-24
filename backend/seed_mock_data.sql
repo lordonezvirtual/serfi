@@ -1,0 +1,17 @@
+-- Limpiar datos existentes (opcional)
+DELETE FROM api.tareas_hitl;
+DELETE FROM api.clientes;
+
+-- Insertar Clientes (Profiles)
+INSERT INTO api.clientes (id, nombre, email, edad, ciudad, segmento, antiguedad, canal_preferido, etiqueta, es_asesor, rol, sucursal, scoring_crediticio) VALUES
+('maria', 'María Amparo Gutiérrez', 'maria.amparo@ejemplo.com', 62, 'Cali', 'Adulto Mayor', '14 años', 'WhatsApp', 'No usa app', false, NULL, NULL, 750),
+('carlos', 'Carlos Herrera Díaz', 'carlos.herrera@ejemplo.com', 38, 'Barranquilla', 'Digital Activo', '6 años', 'Telegram', 'Cliente frecuente Olimpica', false, NULL, NULL, 820),
+('alberto', 'Alberto Junior Restrepo', 'alberto.junior@ejemplo.com', 29, 'Soledad', 'Digital Activo', '2 años', 'WhatsApp', 'Comprador de tecnología', false, NULL, NULL, 690),
+('juliana', 'Asesor: Juliana Mora', 'juliana.mora@serfinanza.com', 28, 'Bogotá', 'Asesor Interno', '3 meses', 'CenterCall', 'Modo copiloto asesor', true, 'Asesora Junior', 'Bogotá Chapinero', NULL);
+
+-- Insertar Tareas HITL
+INSERT INTO api.tareas_hitl (id, cliente_nombre, cliente_segmento, agente_nombre, tipo_tarea, descripcion, valor_original, valor_propuesto, confianza, estado, hace_cuanto, documento_rag, audio_voz, transcripcion_dialogo) VALUES
+('hitl-1', 'María Amparo Gutiérrez', 'Adulto Mayor', 'Agente UX 50+', 'Actualización de Dirección', 'Cambio de domicilio solicitado vía audio de voz en WhatsApp. Requiere autorización regulada de firma digital por operador.', 'Calle 5 # 34-12, Cali', 'Avenida 3 Norte # 23-45, Apto 402, Cali', 94, 'pending', 'Hace 3 min', 'Actualización de datos paso a paso', true, 'María Amparo: "...sí mijo, por favor cámbiame la dirección de correspondencia a la Avenida 3 Norte número 23 guion 45, apartamento 402 en la ciudad de Cali, que me mudé con mi hija el mes pasado..."'),
+('hitl-2', 'Carlos Herrera Díaz', 'Digital Activo', 'Agente Perfil 360', 'Aumento de Cupo', 'Pre-aprobación y liberación de cupo en Tarjeta Olímpica Serfinanza basado en scoring crediticio y 65% de utilización recurrente.', '$5,000,000 COP', '$6,500,000 COP', 98, 'pending', 'Hace 12 min', 'Tarifario Tarjeta Olimpica 2026', false, 'Agente 360: "Detectando uso recurrente en Olímpica y comportamiento AAA de pago. Sugiriendo aumento de cupo inmediato al 30% adicional para asegurar compras en el Sábado Madrugón."'),
+('hitl-3', 'Roberto Gómez Oñate', 'Cliente Preferencial', 'Agente Banca', 'Exención de Tasa', 'Excepción de tasa preferencial de SuperCDT al 13.0% E.A. (el límite estándar autorizado es 12.5% E.A.) para retención de fondos de $15M.', '12.5% E.A.', '13.0% E.A. (Monto $15,000,000)', 91, 'pending', 'Hace 25 min', 'Reglamento SuperCDT v3.2', false, 'Roberto Gómez: "Si no me mejoran la tasa del CDT al 13%, tendré que retirar los 15 millones de pesos y llevarlos a otro banco que me ofrece mejor rentabilidad."'),
+('hitl-4', 'Campañas Automáticas', 'Segmento Adulto Mayor (420 cls)', 'Agente Retail Olimpica', 'Difusión de Campaña', 'Envío proactivo masivo de SMS y alertas personalizadas para la promoción del Sábado Madrugón de electrodomésticos.', 'Ninguno', 'Difusión SMS a 420 contactos segmentados', 96, 'pending', 'Hace 45 min', 'Calendario de eventos especiales', false, 'Agente Retail: "Planificando envío de SMS personalizado para adultos mayores en Cali sin App activa en los últimos 30 días, informando sobre descuento exclusivo del 30% en electrodomésticos Olímpica."');

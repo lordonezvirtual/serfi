@@ -1,5 +1,6 @@
 import uuid
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
+from twilio.twiml.messaging_response import MessagingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
@@ -399,3 +400,44 @@ Escribe únicamente la traducción amigable, lista para ser enviada por WhatsApp
         
     return {"translation": translation}
 
+# --- TWILIO WHATSAPP WEBHOOK ---
+
+@app.post("/api/webhooks/twilio")
+async def twilio_webhook(request: Request):
+    form_data = await request.form()
+    incoming_msg = form_data.get("Body", "")
+    from_number = form_data.get("From", "")
+    
+    # Identificar cliente (simulación de Mapeo)
+    client_id = "whatsapp_" + from_number.replace("whatsapp:", "")
+    if "555" in from_number:  # Para casos de prueba
+        client_id = "maria"
+        
+    # Validar si el Guardián de Identidad debe actuar aquí también
+    # Para simplicidad en este canal, pasaremos directo al orquestador o 
+    # se podría invocar el endpoint de biometría si hubiese datos
+    
+    messages = [HumanMessage(content=incoming_msg)]
+    
+    state_input = {
+        "messages": messages,
+        "next_agent": None,
+        "client_id": client_id,
+        "hitl_requested": False,
+        "hitl_task": None,
+        "context": {}
+    }
+    
+    try:
+        final_state = compiled_graph.invoke(state_input)
+        response_messages = final_state.get("messages", [])
+        last_response = response_messages[-1].content if response_messages else "Lo siento, no pude procesar la solicitud."
+    except Exception as e:
+        print(f"Error procesando mensaje de WhatsApp: {e}")
+        last_response = "En este momento estamos experimentando intermitencias. Por favor intente en unos minutos."
+        
+    # Responder a Twilio usando TwiML
+    resp = MessagingResponse()
+    resp.message(last_response)
+    
+    return Response(content=str(resp), media_type="application/xml")
