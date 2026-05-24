@@ -175,6 +175,8 @@ export class OffersComponent implements OnInit, AfterViewInit {
       profileId = 'juliana';
     }
 
+    localStorage.setItem('active_chat_profile', profileId);
+
     // Go to chat. The active welcome triggers automatically on redirect.
     this.router.navigate(['/chat']).then(() => {
       // Small delay just to let page transition, then we alert the tester

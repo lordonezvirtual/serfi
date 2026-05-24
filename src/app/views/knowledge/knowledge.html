@@ -1,8 +1,19 @@
 <div class="space-y-6">
   <!-- Encabezado de Vista -->
-  <div>
-    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Gestor de Base RAG</h1>
-    <p class="text-slate-500 text-sm">Gestiona la base de conocimientos que alimenta las respuestas cognitivas del Agente 360.</p>
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Gestor de Base RAG</h1>
+      <p class="text-slate-500 text-sm">Gestiona la base de conocimientos que alimenta las respuestas cognitivas del Agente 360.</p>
+    </div>
+    
+    <!-- Status Pill of Portfolio Agent -->
+    <div class="flex items-center space-x-2 bg-emerald-50 border border-emerald-250 px-3.5 py-1.5 rounded-full text-3xs font-extrabold text-emerald-700 tracking-wide uppercase shrink-0">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      </span>
+      <span>Agente 6: Portafolio Autónomo Activo</span>
+    </div>
   </div>
 
   <!-- Banners de Notificaciones de Acción -->
@@ -14,14 +25,34 @@
   }
 
   @if (actionSuccess()) {
-    <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center justify-between text-xs font-semibold animate-bounce">
+    <div class="p-4 bg-emerald-50 border border-emerald-250 text-emerald-800 rounded-2xl flex items-center justify-between text-xs font-semibold">
       <span>{{ actionSuccess() }}</span>
       <button (click)="actionSuccess.set(null)" class="text-slate-400 hover:text-slate-600 text-sm cursor-pointer">✕</button>
     </div>
   }
 
-  <!-- Distribución de Dos Columnas (Split Layout) -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+  <!-- PESTAÑAS PRINCIPALES DEL GESTOR (Biblioteca, Scraper Worker, Traductor 50+) -->
+  <div class="flex border-b border-slate-200 space-x-6 pb-px overflow-x-auto scrollbar-none">
+    <button (click)="activeSubView.set('documents')"
+            [ngClass]="activeSubView() === 'documents' ? 'border-[#1E4D8C] text-[#1E4D8C] font-black' : 'border-transparent text-slate-500 hover:text-slate-750 font-semibold'"
+            class="pb-3 border-b-2 text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0">
+      📁 Biblioteca RAG & Probador
+    </button>
+    <button (click)="activeSubView.set('scraper')"
+            [ngClass]="activeSubView() === 'scraper' ? 'border-[#1E4D8C] text-[#1E4D8C] font-black' : 'border-transparent text-slate-500 hover:text-slate-750 font-semibold'"
+            class="pb-3 border-b-2 text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0 flex items-center space-x-1.5">
+      <span>🤖</span> <span>Conector Autónomo (Worker)</span>
+    </button>
+    <button (click)="activeSubView.set('translator')"
+            [ngClass]="activeSubView() === 'translator' ? 'border-[#1E4D8C] text-[#1E4D8C] font-black' : 'border-transparent text-slate-500 hover:text-slate-750 font-semibold'"
+            class="pb-3 border-b-2 text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0 flex items-center space-x-1.5">
+      <span>👵</span> <span>Traductor UX 50+ (Lenguaje Claro)</span>
+    </button>
+  </div>
+
+  @if (activeSubView() === 'documents') {
+    <!-- Distribución de Dos Columnas (Split Layout) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fade-in">
     
     <!-- COLUMNA IZQUIERDA: Biblioteca de Documentos (7 columnas) -->
     <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
@@ -201,9 +232,304 @@
           </div>
         }
       </div>
-
     </div>
   </div>
+}
+
+  @if (activeSubView() === 'scraper') {
+    <!-- PESTAÑA DEL WORKER AUTÓNOMO (SCAPING & EMBEDDINGS VECTOR DB) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fade-in">
+      
+      <!-- Panel de Control del Scraper -->
+      <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <div>
+          <h2 class="text-base font-bold text-slate-800">Parámetros del Worker de Captación</h2>
+          <p class="text-slate-500 text-xs">Simula cómo el Worker automático escanea la web oficial de Serfinanza y detecta actualizaciones en vivo.</p>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Campo URL -->
+          <div class="space-y-1.5">
+            <label class="block text-3xs font-extrabold text-slate-650 uppercase tracking-wider">URL Comercial a Escanear</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 bg-slate-50 text-slate-400 text-3xs font-mono">https://</span>
+              <input type="text" 
+                     [(ngModel)]="scraperUrl" 
+                     class="flex-1 bg-white border border-slate-200 rounded-r-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+            </div>
+          </div>
+
+          <!-- Control deslizante de Tasa de CDT -->
+          <div class="space-y-2 p-4 bg-slate-50 border rounded-xl">
+            <div class="flex items-center justify-between">
+              <span class="text-3xs font-extrabold text-slate-700 uppercase tracking-wider">Simular Cambio de Tasa (CDT 360d)</span>
+              <span class="px-2 py-0.5 rounded text-xs font-black bg-blue-50 text-[#1E4D8C] border">{{ customRateCDT }}% E.A.</span>
+            </div>
+            <p class="text-[10px] text-slate-450 leading-tight font-semibold">Arrastra el selector para cambiar la tasa comercial publicada en el sitio oficial. El conector detectará el cambio automáticamente.</p>
+            <input type="range" 
+                   [(ngModel)]="customRateCDT" 
+                   min="8.00" 
+                   max="15.00" 
+                   step="0.05"
+                   class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#1E4D8C] mt-1" />
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
+              <span>8.0%</span>
+              <span>12.5% (Tasa Base)</span>
+              <span>15.0%</span>
+            </div>
+          </div>
+
+          <!-- Beneficios Extra Tarjeta Olímpica -->
+          <div class="space-y-1.5">
+            <label class="block text-3xs font-extrabold text-slate-650 uppercase tracking-wider">Inyectar Nuevo Beneficio (Tarjeta Olímpica)</label>
+            <p class="text-[10px] text-slate-450 leading-tight font-semibold">Escribe un nuevo beneficio (ej. "30% de descuento en medicamentos los domingos"). El conector autónomo lo extraerá e indexará.</p>
+            <textarea [(ngModel)]="customBenefit" 
+                      placeholder="Ej: 30% de descuento los domingos en Droguerías Olímpica pagando con la Tarjeta..."
+                      rows="2"
+                      class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C] mt-1"></textarea>
+          </div>
+
+          <!-- Botón de Ejecución -->
+          <div class="pt-2">
+            @if (!isScraping()) {
+              <button (click)="runPortfolioScrape()" 
+                      class="w-full bg-[#1E4D8C] hover:bg-blue-800 text-white font-extrabold text-xs py-3 px-4 rounded-xl transition-all cursor-pointer shadow-md flex items-center justify-center space-x-2">
+                <span>⚡</span>
+                <span>Iniciar Escaneo y Sincronización en Tiempo Real</span>
+              </button>
+            } @else {
+              <div class="space-y-3">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                  <span class="flex items-center space-x-2">
+                    <span class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-[#1E4D8C] border-t-transparent"></span>
+                    <span>{{ scrapingStep() }}</span>
+                  </span>
+                  <span>{{ scrapProgress() }}%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                  <div class="bg-[#1E4D8C] h-2 rounded-full transition-all duration-300" [style.width.%]="scrapProgress()"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Vector DB logs / Extracted values -->
+      <div class="lg:col-span-6 space-y-6">
+        
+        <!-- Estado y Resultados del Scraper -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-800">Resultados del Conector en Tiempo Real</h2>
+            @if (hasScraped()) {
+              <button (click)="resetScraper()" class="text-xs text-[#1E4D8C] hover:underline font-bold cursor-pointer">Reestablecer</button>
+            }
+          </div>
+
+          @if (!hasScraped()) {
+            <div class="py-16 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+              <span class="text-4xl block mb-2">🤖</span>
+              <p class="text-xs font-bold text-slate-755">Worker en espera de ejecución</p>
+              <p class="text-[10px] text-slate-400 max-w-xs mx-auto mt-1 leading-normal">Haz clic en el botón de escaneo para que el agente extraiga la información comercial actual de la página de Serfinanza.</p>
+            </div>
+          } @else {
+            <div class="space-y-4 animate-fade-in">
+              <!-- Info Scraped -->
+              <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-between text-[11px] font-bold text-emerald-800">
+                <span>🕷️ Origen: {{ scraperUrl }}</span>
+                <span>🕒 Sinc: {{ "Ahora mismo" }}</span>
+              </div>
+
+              <!-- Tasas de Interés Detectadas -->
+              <div class="space-y-2">
+                <h3 class="text-3xs font-extrabold text-slate-450 uppercase tracking-wider">Tasas de Captación Detectadas</h3>
+                <div class="grid grid-cols-1 gap-2">
+                  @for (item of scrapedRates(); track item.product) {
+                    <div class="p-3 bg-slate-50 border rounded-xl flex items-center justify-between">
+                      <div>
+                        <p class="text-xs font-bold text-slate-850">{{ item.product }}</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Tasa anterior: {{ item.old_rate }}</p>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        @if (item.rate !== item.old_rate) {
+                          <span class="text-[9px] font-extrabold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">¡MODIFICADO!</span>
+                        }
+                        <span class="text-xs font-black text-slate-700">{{ item.rate }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Beneficios de Tarjeta Detectados -->
+              <div class="space-y-2">
+                <h3 class="text-3xs font-extrabold text-slate-450 uppercase tracking-wider">Beneficios y Campañas Extractados</h3>
+                <div class="space-y-2">
+                  @for (ben of scrapedBenefits(); track ben.benefit) {
+                    <div class="p-3 bg-slate-50 border rounded-xl space-y-1">
+                      <div class="flex items-center justify-between">
+                        <span class="text-3xs font-extrabold text-slate-655 bg-slate-200 px-2 py-0.5 rounded">{{ ben.product }}</span>
+                        <span class="text-[9px] font-black" 
+                              [ngClass]="ben.status.includes('NUEVO') ? 'text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100' : 'text-slate-400'">
+                          {{ ben.status }}
+                        </span>
+                      </div>
+                      <p class="text-2xs font-semibold text-slate-700 leading-snug">{{ ben.benefit }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Embeddings log simulation -->
+              <div class="p-4 bg-slate-900 rounded-xl font-mono text-[9px] text-emerald-400 space-y-1.5 border border-slate-800 max-h-[140px] overflow-y-auto">
+                <p class="text-slate-400 text-[8px] uppercase font-bold tracking-wider mb-1">Log del Motor Vectorial RAG</p>
+                <p class="text-slate-500">[0ms] Invocando scraper de contenido comercial...</p>
+                <p class="text-slate-500">[350ms] Extracción exitosa. Analizando diferencias vs DB local...</p>
+                @if (detectedChanges()) {
+                  <p class="text-amber-400">⚡ [450ms] ¡Alerta de cambio detectado! Modificada tasa de Súper CDT Olímpica a {{ customRateCDT.toFixed(2) }}% E.A.</p>
+                  @if (customBenefit) {
+                    <p class="text-emerald-400">✨ [550ms] Nuevo beneficio de Tarjeta Olímpica encontrado: "{{ customBenefit }}".</p>
+                  }
+                  <p>[700ms] Iniciando chunking semántico en fragmentos de 500 tokens...</p>
+                  <p>[800ms] Llamando a OpenAI text-embedding-3-small para vectorizar 5 fragmentos...</p>
+                  <p class="text-emerald-500">✔ [950ms] Embeddings generados con éxito (Precisión score 99%).</p>
+                  <p class="text-emerald-500">✔ [1000ms] Vector Database sincronizada y persistida con éxito en PostgreSQL.</p>
+                } @else {
+                  <p class="text-slate-400">[450ms] No se detectaron cambios con los valores actuales en la base de datos.</p>
+                  <p class="text-emerald-500">✔ [600ms] Sincronización realizada en modo pasivo. Sin cambios requeridos.</p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+      </div>
+
+    </div>
+  }
+
+  @if (activeSubView() === 'translator') {
+    <!-- PESTAÑA DEL TRADUCTOR UX 50+ -->
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6 animate-fade-in">
+      <div>
+        <h2 class="text-base font-bold text-slate-800">Traductor de Data Real a Lenguaje Claro (UX 50+)</h2>
+        <p class="text-slate-500 text-xs font-semibold">Simula cómo la inteligencia artificial de Serfinanza toma tasas de interés técnicas y las traduce en explicaciones llenas de cariño y seguridad en WhatsApp.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Columna Izquierda: Entrada técnica -->
+        <div class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="block text-3xs font-extrabold text-slate-655 uppercase tracking-wider">Texto Técnico a Traducir</label>
+            <textarea [(ngModel)]="technicalInput" 
+                      rows="6"
+                      placeholder="Escribe la tasa o tarifa técnica aquí..."
+                      class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C] font-mono leading-relaxed mt-1"></textarea>
+          </div>
+
+          <!-- Ajustes Rápidos / Preestablecidos -->
+          <div class="space-y-2">
+            <span class="block text-4xs font-extrabold text-slate-400 uppercase tracking-wider">Plantillas Técnicas Preestablecidas</span>
+            <div class="flex flex-col gap-2">
+              <button (click)="technicalInput = 'Súper CDT Olímpica 90 días: Tasa autorizada del 10.25% E.A., con cobro del GMF 4x1000 exento por retiros de montos menores a 10 millones de pesos.'"
+                      class="text-left px-3 py-2.5 rounded-lg bg-slate-50 border text-[11px] hover:bg-slate-100 font-bold text-slate-700 transition-colors">
+                💰 CDT 90d Tasa 10.25% + Exención GMF
+              </button>
+              <button (click)="technicalInput = 'Súper CDT Olímpica 360 días: Tasa garantizada del 12.50% E.A. Inversiones a plazos fijos respaldadas por el seguro de depósito FOGAFIN hasta por $50,000,000 COP.'"
+                      class="text-left px-3 py-2.5 rounded-lg bg-slate-50 border text-[11px] hover:bg-slate-100 font-bold text-slate-700 transition-colors">
+                🛡️ CDT 360d Tasa 12.50% + Respaldo FOGAFIN
+              </button>
+              <button (click)="technicalInput = 'Tarjeta Olímpica Serfinanza: Descuento directo exclusivo del 30% en electrodomésticos en eventos de Sábado Madrugón, y 20% en frutas/verduras los miércoles de plaza.'"
+                      class="text-left px-3 py-2.5 rounded-lg bg-slate-50 border text-[11px] hover:bg-slate-100 font-bold text-slate-700 transition-colors">
+                🛍️ Tarjeta Olímpica: Sábados y Miércoles de Plaza
+              </button>
+            </div>
+          </div>
+
+          <!-- Botón de Acción -->
+          <button (click)="runUX50Translation()" 
+                  [disabled]="isTranslating() || !technicalInput.trim()"
+                  class="w-full bg-[#1E4D8C] hover:bg-blue-800 text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all cursor-pointer shadow-md flex items-center justify-center space-x-2 disabled:opacity-50">
+            @if (isTranslating()) {
+              <span class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent"></span>
+              <span>Procesando Traducción Empática (Claude 3.5)...</span>
+            } @else {
+              <span>✨</span>
+              <span>Traducir a Formato Amigable (UX 50+)</span>
+            }
+          </button>
+        </div>
+
+        <!-- Columna Derecha: Vista Previa WhatsApp -->
+        <div class="space-y-3">
+          <span class="block text-4xs font-extrabold text-slate-400 uppercase tracking-wider text-center">Visualización en Canal WhatsApp (Traductor de Data Real)</span>
+          
+          <!-- Teléfono Simulador -->
+          <div class="bg-[#E5DDD5] rounded-3xl border border-slate-350 shadow-lg overflow-hidden flex flex-col h-[400px]">
+            
+            <!-- WhatsApp Header -->
+            <div class="bg-[#075E54] text-white p-3.5 flex items-center space-x-2.5 shrink-0">
+              <div class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-base shadow border">
+                👵
+              </div>
+              <div>
+                <p class="text-xs font-black">Ser — Mi Asesor Financiero 360</p>
+                <p class="text-[9px] text-[#A6D5D0]">en línea</p>
+              </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="flex-1 p-4 overflow-y-auto space-y-4">
+              
+              <!-- Message Bubble User -->
+              <div class="flex justify-end">
+                <div class="bg-[#DCF8C6] text-slate-800 p-2.5 rounded-xl rounded-tr-none text-2xs max-w-[85%] shadow-sm font-semibold">
+                  Mijo, ¿me puedes explicar qué es esa tasa de CDT y qué beneficios tiene mi tarjeta?
+                  <span class="text-[8px] text-slate-500 block text-right mt-1 font-mono">16:42 ✔✔</span>
+                </div>
+              </div>
+
+              <!-- Message Bubble Assistant (Renders the Translation) -->
+              @if (friendlyOutput()) {
+                <div class="flex justify-start animate-fade-in">
+                  <div class="bg-white text-slate-850 p-3 rounded-xl rounded-tl-none text-2xs max-w-[88%] shadow-sm space-y-2 leading-relaxed">
+                    <p class="whitespace-pre-line text-slate-800 font-semibold">{{ friendlyOutput() }}</p>
+                    
+                    <!-- WhatsApp Suggestions -->
+                    <div class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-100">
+                      <span class="px-2.5 py-1 bg-slate-50 border text-[9px] rounded-full font-bold text-[#1E4D8C] cursor-pointer hover:bg-slate-200">📊 Ver mi saldo</span>
+                      <span class="px-2.5 py-1 bg-slate-50 border text-[9px] rounded-full font-bold text-[#1E4D8C] cursor-pointer hover:bg-slate-200">🗣️ Hablar con asesor</span>
+                    </div>
+
+                    <span class="text-[8px] text-slate-400 block text-right mt-1 font-mono font-semibold">16:43</span>
+                  </div>
+                </div>
+              } @else if (isTranslating()) {
+                <!-- Typing bubble simulator -->
+                <div class="flex justify-start">
+                  <div class="bg-white text-slate-500 px-3 py-2.5 rounded-xl rounded-tl-none text-3xs shadow-sm flex items-center space-x-1">
+                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                  </div>
+                </div>
+              } @else {
+                <div class="h-full flex items-center justify-center text-slate-400 text-center py-20">
+                  <p class="text-3xs font-extrabold max-w-[200px] leading-relaxed">Haz clic en **Traducir** para ver cómo "Ser" le explicará estos datos técnicos al adulto mayor.</p>
+                </div>
+              }
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  }
 
   <!-- MODAL 1: CHUNKS DE BAJA CONFIANZA -->
   @if (showLowConfidenceModal()) {

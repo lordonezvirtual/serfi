@@ -46,6 +46,26 @@ export class KnowledgeComponent {
   protected showLowConfidenceModal = signal<boolean>(false);
   protected showUploadModal = signal<boolean>(false);
 
+  // Sub-view Tab state
+  protected activeSubView = signal<'documents' | 'scraper' | 'translator'>('documents');
+
+  // Scraper Tab State
+  protected scraperUrl = 'https://www.serfinanza.com.co/tasas-y-tarifas';
+  protected customRateCDT = 12.50;
+  protected customBenefit = '';
+  protected isScraping = signal<boolean>(false);
+  protected scrapingStep = signal<string>('');
+  protected scrapProgress = signal<number>(0);
+  protected hasScraped = signal<boolean>(false);
+  protected scrapedRates = signal<any[]>([]);
+  protected scrapedBenefits = signal<any[]>([]);
+  protected detectedChanges = signal<boolean>(false);
+
+  // Translator Tab State
+  protected technicalInput = 'Tasa CDT 90 días: Tasa autorizada del 10.25% E.A., con cobro del GMF 4x1000 exento por retiros de montos menores a 10 millones de pesos.';
+  protected friendlyOutput = signal<string>('');
+  protected isTranslating = signal<boolean>(false);
+
   // RAG query tester form
   protected queryTesterInput = '';
   protected retrievedChunks = signal<RetrievedChunk[]>([]);
@@ -211,5 +231,186 @@ export class KnowledgeComponent {
     };
     
     this.dataService.documents.update((items) => [newDoc, ...items]);
+  }
+
+  // Trigger Autonomous Scraper Simulation
+  protected async runPortfolioScrape() {
+    this.isScraping.set(true);
+    this.scrapProgress.set(5);
+    this.scrapingStep.set('Iniciando Worker Autónomo de Portafolio...');
+
+    const steps = [
+      { progress: 15, step: 'Conectando a ' + this.scraperUrl + '...' },
+      { progress: 35, step: 'Scraping de tablas HTML completado. Analizando nodos de tasas y tarifas...' },
+      { progress: 55, step: 'Extrayendo valores financieros de captación y beneficios vigentes...' },
+      { progress: 75, step: 'Procesando chunking semántico y generando embeddings vectoriales (Azure OpenAI)...' },
+      { progress: 90, step: 'Subiendo embeddings a la base de datos vectorial e indexando...' },
+      { progress: 100, step: 'Base de conocimiento RAG actualizada exitosamente.' }
+    ];
+
+    for (const s of steps) {
+      await new Promise(resolve => setTimeout(resolve, 350));
+      this.scrapProgress.set(s.progress);
+      this.scrapingStep.set(s.step);
+    }
+
+    try {
+      const res = await fetch('http://localhost:8000/api/portfolio/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: this.scraperUrl,
+          force_rate_change: this.customRateCDT,
+          force_benefit_change: this.customBenefit || undefined
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        this.scrapedRates.set(data.extracted_rates);
+        this.scrapedBenefits.set(data.extracted_benefits);
+        this.detectedChanges.set(data.detected_changes);
+
+        // If rate was changed, update documents and add a new dynamic auto-scraped document for visual wow
+        if (data.detected_changes) {
+          const formattedRate = `${this.customRateCDT.toFixed(2)}% E.A.`;
+          
+          // 1. Update the mock document in MockDataService
+          this.dataService.documents.update(docs => 
+            docs.map(d => 
+              d.title.includes('Reglamento SuperCDT') 
+                ? { ...d, lastUpdated: 'Auto-Sincronizado Hoy', chunks: d.chunks + 1 }
+                : d
+            )
+          );
+
+          // 2. Add an "Auto-Scraped Update" document
+          const scraperDocId = 'doc-scraped-' + Date.now();
+          const newScrapedDoc: RAGDocument = {
+            id: scraperDocId,
+            title: `Autónomo: Actualización de Tasas CDT (${formattedRate})`,
+            category: 'Productos bancarios',
+            lastUpdated: 'Hace un momento',
+            chunks: 5,
+            confidence: 99
+          };
+          this.dataService.documents.update(items => [newScrapedDoc, ...items]);
+        }
+      }
+    } catch (err) {
+      console.warn("Backend scraper endpoint not reachable, running high fidelity mock scraper", err);
+      // Fallback:
+      const formattedRate = `${this.customRateCDT.toFixed(2)}% E.A.`;
+      this.scrapedRates.set([
+        { product: 'Súper CDT Olímpica 90 días', rate: '10.25% E.A.', old_rate: '10.25% E.A.' },
+        { product: 'Súper CDT Olímpica 180 días', rate: '11.50% E.A.', old_rate: '11.50% E.A.' },
+        { product: 'Súper CDT Olímpica 360 días', rate: formattedRate, old_rate: '12.50% E.A.' },
+        { product: 'Cuenta de Ahorros Estándar', rate: '3.00% E.A.', old_rate: '3.00% E.A.' }
+      ]);
+
+      const initialBenefits = [
+        { product: 'Tarjeta Olímpica', benefit: '30% descuento en electrodomésticos en Sábado Madrugón.', status: 'Vigente' },
+        { product: 'Tarjeta Olímpica', benefit: '20% descuento en frutas y verduras en Miércoles de Plaza.', status: 'Vigente' }
+      ];
+
+      if (this.customBenefit) {
+        initialBenefits.push({
+          product: 'Tarjeta Olímpica',
+          benefit: this.customBenefit,
+          status: '¡NUEVO BENEFICIO DETECTADO!'
+        });
+      }
+
+      this.scrapedBenefits.set(initialBenefits);
+      this.detectedChanges.set(true);
+
+      // Update documents list
+      this.dataService.documents.update(docs => 
+        docs.map(d => 
+          d.title.includes('Reglamento SuperCDT') 
+            ? { ...d, lastUpdated: 'Auto-Sincronizado Hoy', chunks: d.chunks + 1 }
+            : d
+        )
+      );
+
+      const scraperDocId = 'doc-scraped-' + Date.now();
+      const newScrapedDoc: RAGDocument = {
+        id: scraperDocId,
+        title: `Autónomo: Actualización de Tasas CDT (${formattedRate})`,
+        category: 'Productos bancarios',
+        lastUpdated: 'Hace un momento',
+        chunks: 5,
+        confidence: 99
+      };
+      this.dataService.documents.update(items => [newScrapedDoc, ...items]);
+    }
+
+    this.isScraping.set(false);
+    this.hasScraped.set(true);
+    this.actionSuccess.set('✅ Sincronización de Portafolio Autónoma Completada. ¡Se detectaron cambios e indexaron nuevos embeddings vectoriales!');
+  }
+
+  // Reset Scraper View
+  protected resetScraper() {
+    this.hasScraped.set(false);
+    this.scrapedRates.set([]);
+    this.scrapedBenefits.set([]);
+    this.detectedChanges.set(false);
+    this.customBenefit = '';
+  }
+
+  // Trigger Senior Language Friendly Translation
+  protected async runUX50Translation() {
+    if (!this.technicalInput.trim()) return;
+    this.isTranslating.set(true);
+    this.friendlyOutput.set('');
+
+    try {
+      const res = await fetch('http://localhost:8000/api/portfolio/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          technical_text: this.technicalInput
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        this.friendlyOutput.set(data.translation);
+      }
+    } catch (err) {
+      console.warn("Backend translation endpoint not reachable, running local rules-based simulation", err);
+      // Fallback
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      const t = this.technicalInput.toLowerCase();
+      if (t.includes('10.25') || t.includes('90')) {
+        this.friendlyOutput.set(
+          "👵 **¡Hola mi señora linda!** Qué alegría saludarla hoy. 🌸\n\n" +
+          "Para los **3 meses** (90 días) por los que me pregunta, nuestro banco le ofrece una tasa maravillosa del **10.25% E.A.** " +
+          "Eso significa, en palabras sencillas, que por cada monedita que guarde con nosotros, su **platica ganará de forma muy segura** un rendimiento muy bonito. " +
+          "Es como sembrar una semillita y verla crecer sin riesgos. ¡Su platica estará durmiendo segura mientras gana dinero para sus gustos o sus nietos!\n\n" +
+          "Y lo mejor de todo es que el impuesto del **4 por mil no se lo cobrarán** si retira montos de menos de 10 millones. ¡Todo es para consentirla!"
+        );
+      } else if (t.includes('12.5') || t.includes('360')) {
+        this.friendlyOutput.set(
+          "👴 **¡Hola mi estimado caballero!** Qué gusto saludarlo en este lindo día. 👔\n\n" +
+          "Si decide guardar sus ahorros con nosotros durante **un año completo** (360 días), le tenemos una noticia excelente: " +
+          "su dinero ganará una tasa súper especial del **12.50% E.A.**\n\n" +
+          "Esto significa que su platica estará **totalmente protegida y creciendo a paso firme**. Por ejemplo, si decide guardar su platica en el **Súper CDT Olímpica**, " +
+          "al final del año recibirá sus ahorros completitos más un extra muy generoso para que disfrute con total tranquilidad.\n\n" +
+          "¿Desea que le hagamos una simulación exacta con el monto que tiene pensado invertir?"
+        );
+      } else {
+        this.friendlyOutput.set(
+          "👵 **¡Hola mi señora linda!** Qué gusto me da saludarla en este día. 🌸\n\n" +
+          "Le traduzco estos datos tan fríos del banco en palabras muy sencillas: lo que nos dice el papel es que **su dinero estará muy seguro** y le dará **excelentes ganancias** sin sorpresas raras de cobros. " +
+          "Además, con su **Tarjeta Olímpica** o su cuenta, su platica rinde mucho más y está completamente protegida por nuestras normas seguras.\n\n" +
+          "¡Aquí estoy para cuidarle su platica y explicárselo todo con calma y una sonrisa!"
+        );
+      }
+    }
+
+    this.isTranslating.set(false);
   }
 }

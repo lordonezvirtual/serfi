@@ -191,6 +191,8 @@
                 @if (task.taskType === 'Actualización de Dirección') { 📍 }
                 @else if (task.taskType === 'Aumento de Cupo') { 💳 }
                 @else if (task.taskType === 'Exención de Tasa') { 📈 }
+                @else if (task.taskType === 'Ajuste de Cuota') { 💰 }
+                @else if (task.taskType === 'Bloqueo Biométrico') { 🔒 }
                 @else { 📣 }
                 <span>{{ task.taskType }}</span>
               </span>
@@ -341,9 +343,21 @@
             <div>
               <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Evidencia y Diálogo de Soporte</span>
               <div class="mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-                <p class="text-3xs italic text-slate-600 leading-relaxed">
-                  {{ selectedHITLTask()?.transcriptDialog }}
-                </p>
+                @if (selectedHITLTask()?.taskType === 'Bloqueo Biométrico') {
+                  <div class="p-3 bg-rose-50 border border-rose-150 rounded-xl space-y-2">
+                    <div class="flex items-center space-x-1.5">
+                      <span class="text-xs">🚨</span>
+                      <h4 class="text-[10px] font-black text-rose-800 uppercase leading-none">REPORTE DE INTRUSIÓN BIOMÉTRICA</h4>
+                    </div>
+                    <div class="text-[10px] font-semibold text-rose-700 leading-relaxed whitespace-pre-line font-mono">
+                      {{ selectedHITLTask()?.transcriptDialog }}
+                    </div>
+                  </div>
+                } @else {
+                  <p class="text-3xs italic text-slate-600 leading-relaxed whitespace-pre-line">
+                    {{ selectedHITLTask()?.transcriptDialog }}
+                  </p>
+                }
               </div>
             </div>
           </div>

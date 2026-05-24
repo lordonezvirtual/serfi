@@ -249,12 +249,22 @@
                   </div>
                   <div class="space-y-1">
                     <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Auth Token</label>
-                    <input type="password" [(ngModel)]="twilioAuthToken"
+                    <input type="password" [(ngModel)]="twilioAuthToken" placeholder="Ingresa tu AuthToken de Twilio..."
                            class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
                   </div>
                   <div class="space-y-1">
                     <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Número Remitente Twilio</label>
                     <input type="text" [(ngModel)]="twilioSender"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Template Content SID (Plantilla Twilio)</label>
+                    <input type="text" [(ngModel)]="twilioContentSid"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Variables de Contenido (JSON string)</label>
+                    <input type="text" [(ngModel)]="twilioContentVariables"
                            class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
                   </div>
                 </div>
@@ -283,6 +293,45 @@
                     <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Remitente Aprobado (Sender Name)</label>
                     <input type="text" [(ngModel)]="infobipSender"
                            class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Configuración Específica de WhatChimp WhatsApp -->
+            @if (selectedChannel()?.id === 'whatchimp') {
+              <div class="space-y-4 bg-emerald-50/40 p-4.5 rounded-xl border border-emerald-200/50">
+                <h4 class="text-xs font-black text-emerald-800 flex items-center space-x-2">
+                  <span>🐒</span>
+                  <span class="uppercase tracking-wider text-2xs">Configuración WhatChimp Official API</span>
+                </h4>
+                <div class="space-y-3.5">
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">WhatChimp API Key</label>
+                    <input type="password" [(ngModel)]="whatchimpApiKey"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Número de WhatsApp Aprobado</label>
+                    <input type="text" [(ngModel)]="whatchimpSenderNumber"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Namespace de Plantillas (Meta)</label>
+                    <input type="text" [(ngModel)]="whatchimpTemplateNamespace"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                  <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <span class="text-3xs font-bold text-slate-600 uppercase tracking-wider">Markup Rate (Comisiones Meta)</span>
+                    <span class="px-2 py-0.5 rounded-full text-4xs font-black bg-emerald-100 text-emerald-800 uppercase tracking-wide">
+                      {{ whatchimpMarkupFee }}
+                    </span>
+                  </div>
+                  <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="whatchimpSync" [(ngModel)]="whatchimpSyncMeta" class="rounded text-emerald-600 focus:ring-emerald-500 h-3.5 w-3.5" />
+                    <label for="whatchimpSync" class="text-3xs font-semibold text-slate-500 select-none">
+                      Sincronizar automáticamente plantillas con Meta Cloud
+                    </label>
                   </div>
                 </div>
               </div>

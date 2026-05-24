@@ -117,6 +117,17 @@ export class MockDataService {
       tag: 'Cliente frecuente Olimpica',
     },
     {
+      id: 'alberto',
+      name: 'Alberto Junior Restrepo',
+      age: 29,
+      city: 'Soledad',
+      segment: 'Digital Activo',
+      seniority: '2 años',
+      products: ['Cuenta Ahorros', 'Tarjeta Olímpica'],
+      preferredChannel: 'WhatsApp',
+      tag: 'Comprador de tecnología',
+    },
+    {
       id: 'juliana',
       name: 'Asesor: Juliana Mora',
       age: 28,
@@ -249,15 +260,15 @@ export class MockDataService {
     },
     {
       id: 2,
-      title: '🛒 Miércoles de Plaza',
-      description: 'Descuentos de hasta 30% en frutas y verduras de Supertiendas Olímpica pagando con Tarjeta Olímpica.',
+      title: '🛒 Vecino Olímpica (Hiper-Personalizado)',
+      description: 'Cruza hábitos de consumo reales en Olímpica (medicamentos, víveres, hogar) para inyectar ofertas dinámicas no invasivas en chat.',
       targetSegment: 'Tarjetahabientes Olímpica',
       channel: 'WhatsApp, Telegram',
-      metricLabel: 'Enviados hoy',
-      metricValue: '2.041 hoy',
+      metricLabel: 'Conversión de la oferta',
+      metricValue: '+32%',
       isActive: true,
       priority: 2,
-      triggerCondition: 'Día actual es Miércoles',
+      triggerCondition: 'Interacción en chat y compras históricas',
     },
     {
       id: 3,
@@ -353,7 +364,60 @@ export class MockDataService {
     { id: 'doc-12', title: 'Tarifas Superfinanciera 2026', category: 'Regulatorio', lastUpdated: '15 Ene 2026', chunks: 60, confidence: 88 },
   ]);
 
+  private async syncWithPostgREST() {
+    try {
+      const response = await fetch('http://localhost:3000/tareas_hitl?order=creado_at.desc');
+      if (!response.ok) return;
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const mappedTasks = data.map((t: any) => ({
+          id: t.id,
+          clientName: t.cliente_nombre,
+          clientSegment: t.cliente_segmento,
+          agentName: t.agente_nombre,
+          taskType: t.tipo_tarea,
+          description: t.descripcion,
+          originalValue: t.valor_original,
+          proposedValue: t.valor_propuesto,
+          confidence: t.confianza,
+          status: t.estado,
+          timeAgo: t.hace_cuanto,
+          operatorNotes: t.notas_operador || '',
+          ragDocUsed: t.documento_rag || '',
+          userSpeechAudio: !!t.audio_voz,
+          transcriptDialog: t.transcripcion_dialogo || ''
+        }));
+        this.hitlTasks.set(mappedTasks);
+      }
+    } catch (e) {
+      // Quietly fall back to mock data if PostgREST is not running
+    }
+  }
+
+  private async updateTaskStatusOnPostgREST(id: string, status: 'approved' | 'rejected', notes?: string) {
+    try {
+      await fetch(`http://localhost:3000/tareas_hitl?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          estado: status,
+          notas_operador: notes || (status === 'approved' ? 'Aprobado por el operador' : 'Rechazado por el operador')
+        })
+      });
+    } catch (e) {
+      // Ignore network errors
+    }
+  }
+
   constructor() {
+    // Initial sync with database
+    this.syncWithPostgREST();
+
+    // Periodically pull live tasks from PostgREST if available
+    setInterval(() => {
+      this.syncWithPostgREST();
+    }, 5000);
+
     // Start interval to auto-update metrics every 8 seconds
     setInterval(() => {
       this.updateKPIMetrics();
@@ -418,12 +482,20 @@ export class MockDataService {
   }
 
   // Add a new offer
-  public addOffer(newOffer: Offer) {
-    this.offers.update((items) => [...items, newOffer]);
+  public addOffer(offer: Offer) {
+    this.offers.update((items) => [offer, ...items]);
+  }
+
+  // Add a new HITL task manually (e.g. from local fallback biometrics)
+  public addHITLTask(task: HITLTask) {
+    this.hitlTasks.update((tasks) => [task, ...tasks]);
   }
 
   // Approve a Human-in-the-Loop task and execute simulated side effects
   public approveHITLTask(id: string, notes?: string) {
+    // Sync status change to PostgREST
+    this.updateTaskStatusOnPostgREST(id, 'approved', notes);
+
     this.hitlTasks.update((tasks) =>
       tasks.map((t) =>
         t.id === id
@@ -488,11 +560,11 @@ export class MockDataService {
         activeConversations: kpi.activeConversations + 420
       }));
       this.externalIntegrations.update((integrations) =>
-        integrations.map((int) =>
-          int.name === 'WhatsApp Business API'
-            ? { ...int, callsToday: int.callsToday + 420 }
-            : int
-        )
+          integrations.map((int) =>
+            int.name === 'WhatsApp Business API'
+              ? { ...int, callsToday: int.callsToday + 420 }
+              : int
+          )
       );
       this.alerts.update((alerts) => [
         {
@@ -503,11 +575,38 @@ export class MockDataService {
         },
         ...alerts
       ]);
+    } else if (task.taskType === 'Bloqueo Biométrico') {
+      this.alerts.update((alerts) => [
+        {
+          id: String(Date.now()),
+          severity: 'green',
+          message: `HITL: Bloqueo Biométrico de ${task.clientName} LEVANTADO. Identidad verificada. Autenticación continua restaurada.`,
+          timeAgo: 'Ahora mismo'
+        },
+        ...alerts
+      ]);
+    } else if (task.taskType === 'Ajuste de Cuota') {
+      this.kpis.update((kpi) => ({
+        ...kpi,
+        csat: Math.min(5.0, kpi.csat + 0.3)
+      }));
+      this.alerts.update((alerts) => [
+        {
+          id: String(Date.now()),
+          severity: 'green',
+          message: `HITL: Ajuste de cuota aprobado para ${task.clientName}. Cuota de manejo reducida al 50% por fidelidad VIP.`,
+          timeAgo: 'Ahora mismo'
+        },
+        ...alerts
+      ]);
     }
   }
 
   // Reject a Human-in-the-Loop task
   public rejectHITLTask(id: string, notes?: string) {
+    // Sync status change to PostgREST
+    this.updateTaskStatusOnPostgREST(id, 'rejected', notes);
+
     this.hitlTasks.update((tasks) =>
       tasks.map((t) =>
         t.id === id
@@ -519,15 +618,27 @@ export class MockDataService {
     const task = this.hitlTasks().find((t) => t.id === id);
     if (!task) return;
 
-    // Trigger an alert indicating rejection
-    this.alerts.update((alerts) => [
-      {
-        id: String(Date.now()),
-        severity: 'amber',
-        message: `HITL: Proceso "${task.taskType}" para ${task.clientName} RECHAZADO por el operador.`,
-        timeAgo: 'Ahora mismo'
-      },
-      ...alerts
-    ]);
+    if (task.taskType === 'Bloqueo Biométrico') {
+      this.alerts.update((alerts) => [
+        {
+          id: String(Date.now()),
+          severity: 'red',
+          message: `HITL: Intento de suplantación en cuenta de ${task.clientName} CONFIRMADO. Cuenta suspendida permanentemente preventivamente.`,
+          timeAgo: 'Ahora mismo'
+        },
+        ...alerts
+      ]);
+    } else {
+      // Trigger an alert indicating rejection
+      this.alerts.update((alerts) => [
+        {
+          id: String(Date.now()),
+          severity: 'amber',
+          message: `HITL: Proceso "${task.taskType}" para ${task.clientName} RECHAZADO por el operador.`,
+          timeAgo: 'Ahora mismo'
+        },
+        ...alerts
+      ]);
+    }
   }
 }

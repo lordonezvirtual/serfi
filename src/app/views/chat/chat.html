@@ -1,7 +1,35 @@
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] min-h-[500px]">
   
-  <!-- PANEL IZQUIERDO: Selector de Cliente y Canal (4 columnas en LG) -->
-  <div class="lg:col-span-4 flex flex-col space-y-4 h-full">
+  <!-- PANEL IZQUIERDO: Selector de Cliente, Canal y Biometría (4 columnas en LG) -->
+  <div class="lg:col-span-4 flex flex-col space-y-4 h-full overflow-y-auto pr-1 pb-4">
+    <!-- Selector de Cliente Simulado -->
+    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+      <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">Perfil de Cliente</h3>
+      <div class="space-y-2">
+        @for (profile of profiles(); track profile.id) {
+          <button (click)="selectProfile(profile)"
+                  class="w-full flex items-center space-x-3 p-2.5 rounded-xl border text-left transition-all duration-350 shadow-3xs"
+                  [ngClass]="{
+                    'bg-slate-50 border-slate-350 ring-2 ring-slate-600/10': activeProfile()?.id === profile.id,
+                    'bg-white border-slate-150 hover:bg-slate-50': activeProfile()?.id !== profile.id
+                  }">
+            <div class="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-sm shadow-inner shrink-0">
+              @if (profile.id === 'maria') { 👵 }
+              @else if (profile.id === 'carlos') { 👨‍💻 }
+              @else { 🔧 }
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-800 truncate">{{ profile.name }}</h4>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-150 text-slate-700 uppercase">{{ profile.age }} años</span>
+              </div>
+              <p class="text-4xs text-slate-500 truncate mt-0.5">{{ profile.segment }} · {{ profile.city }}</p>
+            </div>
+          </button>
+        }
+      </div>
+    </div>
+
     <!-- Selector de Canal -->
     <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
       <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">Canal de Simulación</h3>
@@ -49,6 +77,357 @@
           <span>📞</span>
           <span>CenterCall</span>
         </button>
+      </div>
+    </div>
+
+    <!-- SIMULADOR DE ENTORNO BIOMÉTRICO (CONTROL DE ANOMALÍAS) -->
+    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Simulador Biométrico</h3>
+        <span class="text-4xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">AJUSTES</span>
+      </div>
+      
+      <!-- Presets Rápidos de Demostración -->
+      <div class="space-y-1.5">
+        <span class="block text-4xs font-bold text-slate-400 uppercase">Escenarios de Ataque (Demo)</span>
+        <div class="grid grid-cols-3 gap-1.5">
+          <button type="button" 
+                  (click)="applyBiometricPreset('normal')"
+                  class="py-1.5 px-2 rounded-lg border text-4xs font-bold text-center bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200 transition-all duration-350 cursor-pointer shadow-3xs">
+            Normal Senior
+          </button>
+          <button type="button" 
+                  (click)="applyBiometricPreset('impostor')"
+                  class="py-1.5 px-2 rounded-lg border text-4xs font-bold text-center bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-200 transition-all duration-350 cursor-pointer shadow-3xs">
+            ⚠️ Impostor
+          </button>
+          <button type="button" 
+                  (click)="applyBiometricPreset('night')"
+                  class="py-1.5 px-2 rounded-lg border text-4xs font-bold text-center bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200 transition-all duration-350 cursor-pointer shadow-3xs">
+            🌙 Hora Inusual
+          </button>
+        </div>
+      </div>
+
+      <!-- Sliders de Simulación -->
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <!-- Cadencia de Escritura (WPM) -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-4xs">
+            <span class="font-bold text-slate-500">Cadencia (WPM)</span>
+            <span class="font-extrabold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded">{{ claudeService.typingSpeedWpm() }} WPM</span>
+          </div>
+          <input type="range" 
+                 min="40" 
+                 max="500" 
+                 step="10"
+                 [value]="claudeService.typingSpeedWpm()"
+                 (input)="claudeService.typingSpeedWpm.set($any($event.target).valueAsNumber)"
+                 class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-600 focus:outline-none" />
+          <div class="flex justify-between text-[7px] text-slate-400">
+            <span>Pausado (40)</span>
+            <span>Senior (110)</span>
+            <span>Impostor (380+)</span>
+          </div>
+        </div>
+
+        <!-- Delay de Respuesta (Segundos) -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-4xs">
+            <span class="font-bold text-slate-500">Espera en Responder</span>
+            <span class="font-extrabold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded">{{ claudeService.responseDelaySec() }}s</span>
+          </div>
+          <input type="range" 
+                 min="1" 
+                 max="25" 
+                 step="1"
+                 [value]="claudeService.responseDelaySec()"
+                 (input)="claudeService.responseDelaySec.set($any($event.target).valueAsNumber)"
+                 class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-600 focus:outline-none" />
+          <div class="flex justify-between text-[7px] text-slate-400">
+            <span>Rápido (2s)</span>
+            <span>Normal (12s)</span>
+            <span>Largo (25s)</span>
+          </div>
+        </div>
+
+        <!-- Hora Simulada -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-4xs mb-1">
+            <span class="font-bold text-slate-500">Hora de Acceso</span>
+            <span class="font-extrabold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded">{{ claudeService.simulatedHour() }}</span>
+          </div>
+          <select [value]="claudeService.simulatedHour()"
+                  (change)="claudeService.simulatedHour.set($any($event.target).value)"
+                  class="w-full text-xs bg-white border border-slate-200 rounded-lg py-1 px-2 focus:outline-none focus:ring-1 focus:ring-slate-400">
+            <option value="09:00">09:00 AM (Horario laboral)</option>
+            <option value="16:00">04:00 PM (Tarde)</option>
+            <option value="20:00">08:00 PM (Noche)</option>
+            <option value="02:00">02:00 AM (Madrugada anómala)</option>
+            <option value="04:30">04:30 AM (Madrugada extrema)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL DE ANÁLISIS BIOMÉTRICO EN TIEMPO REAL -->
+    @if (claudeService.lastBiometricAnalysis(); as analysis) {
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3.5 transition-all duration-500">
+        <!-- Cabecera -->
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Métricas de Identidad</h3>
+          <span class="text-4xs font-bold uppercase px-2 py-0.5 rounded-full"
+                [ngClass]="{
+                  'bg-emerald-50 text-emerald-700 border border-emerald-200': analysis.action === 'allow',
+                  'bg-rose-50 text-rose-700 border border-rose-200 animate-pulse': analysis.action !== 'allow'
+                }">
+            {{ analysis.action === 'allow' ? 'Acceso Seguro' : 'Bloqueo Activo' }}
+          </span>
+        </div>
+
+        <!-- Trust Score Gauge -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-150">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[9px] font-bold text-slate-500 uppercase">Puntaje de Confianza (Trust Score)</span>
+            <span class="text-xs font-black"
+                  [ngClass]="{
+                    'text-emerald-600': analysis.trust_score >= 80,
+                    'text-amber-500': analysis.trust_score >= 50 && analysis.trust_score < 80,
+                    'text-rose-600': analysis.trust_score < 50
+                  }">
+              {{ analysis.trust_score }} / 100
+            </span>
+          </div>
+          <!-- Barra de Progreso -->
+          <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden shadow-inner">
+            <div class="h-full rounded-full transition-all duration-700"
+                 [ngClass]="{
+                   'bg-emerald-500': analysis.trust_score >= 80,
+                   'bg-amber-400': analysis.trust_score >= 50 && analysis.trust_score < 80,
+                   'bg-rose-500': analysis.trust_score < 50
+                 }"
+                 [style.width.%]="analysis.trust_score">
+            </div>
+          </div>
+          
+          <!-- Estado / Alertas Críticas -->
+          @if (analysis.action !== 'allow') {
+            <div class="mt-2.5 p-2 bg-rose-50 rounded-lg border border-rose-150 flex items-start space-x-2">
+              <span class="text-rose-600 text-xs mt-0.5">⚠️</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-[10px] font-black text-rose-800 leading-tight">IDENTIDAD COMPROMETIDA</p>
+                <p class="text-4xs text-rose-600 mt-0.5 leading-normal">{{ analysis.freeze_reason }}</p>
+              </div>
+            </div>
+          } @else {
+            <p class="text-4xs text-slate-500 mt-1.5 text-center leading-normal">
+              OTP Invisible activo. Autenticación continua en segundo plano sin OTP tradicional.
+            </p>
+          }
+        </div>
+
+        <!-- 3 Pilares del Análisis -->
+        <div class="space-y-2.5">
+          <!-- Pilar 1: Cadencia de Escritura -->
+          <div class="flex items-start space-x-2.5">
+            <span class="text-xs mt-0.5">
+              {{ analysis.metrics.timing.status === 'normal' ? '🟢' : '🔴' }}
+            </span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between text-[10px] font-bold">
+                <span class="text-slate-800">1. Cadencia e Interacción</span>
+                <span class="text-4xs uppercase px-1 rounded" [ngClass]="{'bg-emerald-100 text-emerald-700': analysis.metrics.timing.status === 'normal', 'bg-rose-100 text-rose-700': analysis.metrics.timing.status !== 'normal'}">{{ analysis.metrics.timing.status }}</span>
+              </div>
+              <p class="text-4xs text-slate-500 leading-normal mt-0.5">
+                Velocidad: <strong class="text-slate-700">{{ analysis.metrics.timing.wpm }} WPM</strong> · 
+                Espera: <strong class="text-slate-700">{{ analysis.metrics.timing.response_delay_sec }}s</strong>
+              </p>
+              @for (flag of analysis.metrics.timing.flags; track flag) {
+                <p class="text-[9px] font-bold text-rose-600 mt-1 flex items-center">
+                  <span class="mr-1">⚡</span> {{ flag }}
+                </p>
+              }
+            </div>
+          </div>
+
+          <!-- Pilar 2: Estilometría -->
+          <div class="flex items-start space-x-2.5 pt-2 border-t border-slate-100">
+            <span class="text-xs mt-0.5">
+              {{ analysis.metrics.stylometry.status === 'normal' ? '🟢' : '🔴' }}
+            </span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between text-[10px] font-bold">
+                <span class="text-slate-800">2. Estilometría Lingüística</span>
+                <span class="text-4xs uppercase px-1 rounded" [ngClass]="{'bg-emerald-100 text-emerald-700': analysis.metrics.stylometry.status === 'normal', 'bg-rose-100 text-rose-700': analysis.metrics.stylometry.status !== 'normal'}">{{ analysis.metrics.stylometry.status }}</span>
+              </div>
+              <p class="text-4xs text-slate-500 leading-normal mt-0.5">
+                Mayúsculas: <strong class="text-slate-700">{{ analysis.metrics.stylometry.all_caps ? 'Sostenidas' : 'Normal' }}</strong> · 
+                Jergas: <strong class="text-slate-700">{{ analysis.metrics.stylometry.slang_count }}</strong> · 
+                Emojis: <strong class="text-slate-700 capitalize">{{ analysis.metrics.stylometry.emoji_pattern }}</strong> · 
+                Modales: <strong class="text-slate-700">{{ analysis.metrics.stylometry.courtesy_detected ? 'Sí' : 'No' }}</strong>
+              </p>
+              @for (flag of analysis.metrics.stylometry.flags; track flag) {
+                <p class="text-[9px] font-bold text-rose-600 mt-1 flex items-center">
+                  <span class="mr-1">⚡</span> {{ flag }}
+                </p>
+              }
+            </div>
+          </div>
+
+          <!-- Pilar 3: Vector de Acceso -->
+          <div class="flex items-start space-x-2.5 pt-2 border-t border-slate-100">
+            <span class="text-xs mt-0.5">
+              {{ analysis.metrics.access.status === 'normal' ? '🟢' : '🔴' }}
+            </span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between text-[10px] font-bold">
+                <span class="text-slate-800">3. Vector de Acceso y Tono</span>
+                <span class="text-4xs uppercase px-1 rounded" [ngClass]="{'bg-emerald-100 text-emerald-700': analysis.metrics.access.status === 'normal', 'bg-rose-100 text-rose-700': analysis.metrics.access.status !== 'normal'}">{{ analysis.metrics.access.status }}</span>
+              </div>
+              <p class="text-4xs text-slate-500 leading-normal mt-0.5">
+                Hora: <strong class="text-slate-700">{{ analysis.metrics.access.simulated_hour }}</strong> · 
+                Tono: <strong class="text-slate-700 capitalize">{{ analysis.metrics.access.tone }}</strong>
+              </p>
+              @for (flag of analysis.metrics.access.flags; track flag) {
+                <p class="text-[9px] font-bold text-rose-600 mt-1 flex items-center">
+                  <span class="mr-1">⚡</span> {{ flag }}
+                </p>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ANALISTA DE ACCESO DIRECTO (FRICTIONLESS ACCOUNT AGENT COCKPIT) -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-white shadow-xl space-y-3.5 transition-all duration-500 relative overflow-hidden shrink-0">
+      <!-- Cyber glow effect -->
+      <div class="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
+
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <h3 class="text-2xs font-extrabold uppercase tracking-wider text-slate-200">Analista Acceso Directo</h3>
+        </div>
+        <span class="text-[8px] font-bold px-2 py-0.5 rounded-full border bg-emerald-950/80 text-emerald-400 border-emerald-900 uppercase">
+          Confianza Continua
+        </span>
+      </div>
+
+      <!-- Core Bancario Connections -->
+      <div class="bg-black/40 rounded-xl p-2.5 border border-slate-850 space-y-1.5 text-[10px] font-mono leading-tight">
+        <div class="flex justify-between border-b border-slate-850 pb-1.5">
+          <span class="text-slate-500">Canal WhatsApp:</span>
+          <span class="text-slate-350 font-bold">🟢 Conectado</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-850 pb-1.5">
+          <span class="text-slate-500">Biometría Invisible:</span>
+          <span class="text-emerald-400 font-bold">Activo (100% Pasivo)</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Omisión Claves/OTP:</span>
+          <span class="text-emerald-400 font-bold">✓ Habilitado</span>
+        </div>
+      </div>
+
+      <!-- Live Core Bancario Products retrieved in One-Step -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Productos Core (Uno-A-Uno)</span>
+          <span class="text-[8px] font-semibold text-slate-500">PostgREST Sync</span>
+        </div>
+
+        @if (activeProfile()?.id === 'maria') {
+          <div class="space-y-1.5 text-[11px]">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-850 border border-slate-800">
+              <div class="flex items-center space-x-2">
+                <span>💰</span>
+                <div>
+                  <p class="font-bold text-slate-200">Ahorros</p>
+                  <p class="text-[8px] text-slate-500">AC-482910-AH</p>
+                </div>
+              </div>
+              <span class="font-black text-emerald-400">$2.500.000</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-850 border border-slate-800">
+              <div class="flex items-center space-x-2">
+                <span>💳</span>
+                <div>
+                  <p class="font-bold text-slate-200">Tarjeta Olímpica</p>
+                  <p class="text-[8px] text-slate-500">Pago Min: $68.400</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-black text-slate-200 block">$850.000</span>
+                <span class="text-[8px] text-slate-500 block">Vence: 5-Jun</span>
+              </div>
+            </div>
+          </div>
+          
+          @if (activeChannel() === 'WhatsApp') {
+            <button type="button" 
+                    (click)="simulateVoiceNote()"
+                    [disabled]="isTyping()"
+                    class="w-full mt-1.5 cursor-pointer flex items-center justify-center space-x-1.5 py-2 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] transition-all duration-350 disabled:opacity-40 disabled:cursor-not-allowed">
+              <span>🎤</span>
+              <span>Simular Audio (¿Cuánto debo?)</span>
+            </button>
+          }
+        } @else if (activeProfile()?.id === 'carlos') {
+          <div class="space-y-1.5 text-[11px]">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-850 border border-slate-800">
+              <div class="flex items-center space-x-2">
+                <span>💰</span>
+                <div>
+                  <p class="font-bold text-slate-200">Ahorros</p>
+                  <p class="text-[8px] text-slate-500">AC-192837-AH</p>
+                </div>
+              </div>
+              <span class="font-black text-emerald-400">$4.800.000</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-850 border border-slate-800">
+              <div class="flex items-center space-x-2">
+                <span>💳</span>
+                <div>
+                  <p class="font-bold text-slate-200">Tarjeta Gold</p>
+                  <p class="text-[8px] text-slate-500">Uso: 68%</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-black text-slate-200 block">$6.800.000</span>
+                <span class="text-[8px] text-slate-500 block">Cupo: $10M</span>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <p class="text-4xs text-slate-500 italic text-center py-2.5">
+            Canal de Copiloto activo. Los datos del cliente se visualizan en la interfaz de asesor.
+          </p>
+        }
+      </div>
+
+      <!-- Terminal de Monitoreo en Tiempo Real -->
+      <div class="space-y-1.5 pt-1.5 border-t border-slate-800">
+        <span class="text-[8px] font-extrabold uppercase text-slate-400 tracking-wider">Telemetría de la Verificación Silenciosa</span>
+        <div class="bg-black/60 rounded-xl p-2 h-[95px] overflow-y-auto font-mono text-[9px] border border-slate-850/80 flex flex-col space-y-1 scrollbar-none">
+          @for (log of liveLogs(); track log.time) {
+            <div class="leading-normal flex space-x-1.5">
+              <span class="text-slate-500 shrink-0">[{{ log.time }}]</span>
+              <span [ngClass]="{
+                'text-emerald-400 font-semibold': log.type === 'success',
+                'text-sky-400': log.type === 'info',
+                'text-amber-400': log.type === 'warn',
+                'text-red-400 font-bold': log.type === 'error'
+              }">{{ log.message }}</span>
+            </div>
+          }
+        </div>
       </div>
     </div>
 
