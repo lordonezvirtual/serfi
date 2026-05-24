@@ -1,0 +1,194 @@
+<div class="flex h-screen bg-[#F8FAFC] font-sans antialiased overflow-hidden">
+  
+  <!-- BARRA LATERAL (SIDEBAR): Menú de Navegación Principal (Fondo #0F172A) -->
+  <aside class="hidden md:flex md:flex-col md:w-64 bg-[#0F172A] text-slate-350 shrink-0 shadow-xl border-r border-slate-800">
+    <!-- Logotipo Corporativo -->
+    <div class="h-20 flex items-center px-6 border-b border-slate-850">
+      <div class="flex flex-col">
+        <div class="flex items-baseline space-x-1">
+          <span class="text-white font-extrabold text-lg">Banco</span>
+          <span class="text-[#C00000] font-black text-xl tracking-tight">Serfinanza</span>
+        </div>
+        <span class="text-slate-500 font-extrabold text-[10px] uppercase tracking-widest mt-0.5">Plataforma Agente 360</span>
+      </div>
+    </div>
+
+    <!-- Enlaces de Navegación -->
+    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+      <!-- 1. Dashboard -->
+      <a routerLink="/dashboard" 
+         routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
+         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white group">
+        <span class="text-lg">📊</span>
+        <span class="text-xs">Consola de Control</span>
+      </a>
+
+      <!-- 2. Chat Simulator -->
+      <a routerLink="/chat" 
+         routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
+         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white group">
+        <span class="text-lg">💬</span>
+        <span class="text-xs">Simulador de Chat</span>
+      </a>
+
+      <!-- 3. Channels -->
+      <a routerLink="/channels" 
+         routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
+         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white group">
+        <span class="text-lg">🔌</span>
+        <span class="text-xs">Gestión de Canales</span>
+      </a>
+
+      <!-- 4. Knowledge Base -->
+      <a routerLink="/knowledge" 
+         routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
+         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white group">
+        <span class="text-lg">📁</span>
+        <span class="text-xs">Base de RAG</span>
+      </a>
+
+      <!-- 5. Offers Engine -->
+      <a routerLink="/offers" 
+         routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
+         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white group">
+        <span class="text-lg">🏷️</span>
+        <span class="text-xs">Motor de Ofertas</span>
+      </a>
+
+      <!-- 6. Geomarketing GIS -->
+      <a routerLink="/geomarketing" 
+         routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
+         class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white group">
+        <span class="text-lg">🗺️</span>
+        <span class="text-xs">Geomarketing Olímpica</span>
+      </a>
+    </nav>
+
+    <!-- Footer Sidebar: Info de Hackathon -->
+    <div class="p-4 border-t border-slate-850 bg-slate-950/40 text-center">
+      <p class="text-4xs uppercase tracking-widest text-slate-500 font-extrabold">Hackathon Demo</p>
+      <p class="text-3xs text-slate-400 font-semibold mt-1">Banco Serfinanza v1.0.0</p>
+    </div>
+  </aside>
+
+  <!-- CONTENEDOR CENTRAL: Header Superior + Vistas -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    
+    <!-- CABECERA SUPERIOR (NAVBAR) -->
+    <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm z-30">
+      
+      <!-- Logo en Móviles / Título en Escritorio -->
+      <div class="flex items-center space-x-4">
+        <!-- Logo Mobile -->
+        <div class="md:hidden flex items-baseline space-x-1">
+          <span class="text-slate-900 font-extrabold text-sm">Banco</span>
+          <span class="text-[#C00000] font-black text-base">Serfinanza</span>
+        </div>
+        
+        <!-- Título de Contexto -->
+        <h2 class="hidden md:block text-slate-700 text-xs font-black uppercase tracking-wider">
+          Asistente Omnicanal Cognitivo
+        </h2>
+      </div>
+
+      <!-- Barra de Estado del Agente y Configuración -->
+      <div class="flex items-center space-x-5">
+        
+        <!-- Indicador de Status del Agente -->
+        <div class="flex items-center space-x-2.5 bg-slate-50 border px-3.5 py-1.5 rounded-full text-xs font-bold shadow-2xs">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-slate-700 text-3xs font-semibold">Agente Activo: <strong class="text-emerald-700">ÓPTIMO</strong></span>
+        </div>
+
+        <!-- Botón Configuración de API Key -->
+        <button (click)="openSettings()" 
+                class="p-2.5 rounded-xl border border-slate-250 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 transition-all shadow-2xs cursor-pointer"
+                title="Configurar Claude API Key">
+          ⚙️
+        </button>
+
+      </div>
+    </header>
+
+    <!-- AREA DE VISTA ROUTER: Carga las vistas dinámicamente -->
+    <main class="flex-1 overflow-y-auto p-6 relative">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+  <!-- MODAL DE CONFIGURACIÓN CLAUDE API KEY -->
+  @if (showSettingsModal()) {
+    <div class="fixed inset-0 z-50 overflow-hidden flex items-center justify-center" role="dialog" aria-modal="true">
+      <!-- Backdrop blur -->
+      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" (click)="closeSettings()"></div>
+      
+      <!-- Contenedor Modal -->
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden relative z-10 animate-fade-in flex flex-col justify-between">
+        
+        <!-- Cabecera -->
+        <div class="p-6 bg-slate-50 border-b flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-black text-slate-800">Configuración del Agente IA</h3>
+            <p class="text-4xs text-slate-400 uppercase font-extrabold tracking-wider">Integración con Claude API</p>
+          </div>
+          <button (click)="closeSettings()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+        </div>
+
+        <!-- Cuerpo Modal -->
+        <div class="p-6 space-y-4">
+          <p class="text-slate-500 text-xs leading-normal">Para que el asistente "Ser" responda de manera autónoma y contextual usando inteligencia viva, ingresa tu API key de Anthropic Claude.</p>
+          
+          <div class="space-y-1.5">
+            <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">API Key de Anthropic</label>
+            <input type="password" 
+                   [(ngModel)]="apiKeyInput" 
+                   placeholder="sk-ant-api03-..." 
+                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+          </div>
+
+          <!-- Sandbox Toggle Option for convenient demo showing -->
+          <div class="p-3 bg-slate-50 rounded-xl border flex items-center justify-between">
+            <div>
+              <span class="text-3xs font-extrabold text-slate-700 uppercase tracking-wider block">Forzar Simulación Local</span>
+              <span class="text-[10px] text-slate-450 mt-0.5 block leading-tight">Ignorar clave y usar las respuestas pre-cargadas de la demo.</span>
+            </div>
+            <button (click)="toggleForceFallback()" 
+                    class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    [ngClass]="forceFallback() ? 'bg-amber-500' : 'bg-slate-300'">
+              <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    [ngClass]="forceFallback() ? 'translate-x-4' : 'translate-x-0'"></span>
+            </button>
+          </div>
+
+          <p class="text-[10px] text-slate-400 leading-normal">🔑 <strong>Privacidad:</strong> Tu API key se guarda exclusivamente de forma local en tu navegador (localStorage) y nunca sale hacia ningún servidor externo fuera de las peticiones directas a Anthropic.</p>
+        </div>
+
+        <!-- Pie Modal -->
+        <div class="p-6 bg-slate-50 border-t flex items-center justify-between">
+          <button (click)="clearApiKey()" 
+                  [disabled]="!apiKey()"
+                  class="py-2 px-3 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 font-extrabold text-2xs transition-all cursor-pointer disabled:opacity-40">
+            Borrar Clave
+          </button>
+          
+          <div class="flex items-center space-x-2">
+            <button (click)="closeSettings()" 
+                    class="py-2 px-4 rounded-lg border text-2xs font-extrabold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+              Cerrar
+            </button>
+            <button (click)="saveSettings()" 
+                    class="py-2 px-4 rounded-lg bg-[#1E4D8C] text-white hover:bg-blue-800 font-extrabold text-2xs transition-all cursor-pointer">
+              Guardar Clave
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

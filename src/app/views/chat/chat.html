@@ -1,0 +1,257 @@
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] min-h-[500px]">
+  
+  <!-- PANEL IZQUIERDO: Selector de Cliente y Canal (4 columnas en LG) -->
+  <div class="lg:col-span-4 flex flex-col space-y-4 h-full">
+    <!-- Selector de Canal -->
+    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+      <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">Canal de Simulación</h3>
+      <div class="grid grid-cols-2 gap-2">
+        <button (click)="selectChannel('WhatsApp')" 
+                [disabled]="activeProfile()?.isAdvisor"
+                class="flex items-center justify-center space-x-1.5 py-2 px-3 rounded-lg border text-xs font-semibold transition-all duration-300 disabled:opacity-40"
+                [ngClass]="{
+                  'bg-emerald-50 text-emerald-700 border-emerald-500 font-bold': activeChannel() === 'WhatsApp',
+                  'bg-white text-slate-600 border-slate-200 hover:bg-slate-50': activeChannel() !== 'WhatsApp'
+                }">
+          <span>💬</span>
+          <span>WhatsApp</span>
+        </button>
+
+        <button (click)="selectChannel('Telegram')" 
+                [disabled]="activeProfile()?.isAdvisor"
+                class="flex items-center justify-center space-x-1.5 py-2 px-3 rounded-lg border text-xs font-semibold transition-all duration-300 disabled:opacity-40"
+                [ngClass]="{
+                  'bg-sky-50 text-sky-700 border-sky-500 font-bold': activeChannel() === 'Telegram',
+                  'bg-white text-slate-600 border-slate-200 hover:bg-slate-50': activeChannel() !== 'Telegram'
+                }">
+          <span>✈️</span>
+          <span>Telegram</span>
+        </button>
+
+        <button (click)="selectChannel('Web')" 
+                [disabled]="activeProfile()?.isAdvisor"
+                class="flex items-center justify-center space-x-1.5 py-2 px-3 rounded-lg border text-xs font-semibold transition-all duration-300 disabled:opacity-40"
+                [ngClass]="{
+                  'bg-blue-50 text-blue-800 border-blue-700 font-bold': activeChannel() === 'Web',
+                  'bg-white text-slate-600 border-slate-200 hover:bg-slate-50': activeChannel() !== 'Web'
+                }">
+          <span>🌐</span>
+          <span>Web Chat</span>
+        </button>
+
+        <button (click)="selectChannel('CenterCall')" 
+                [disabled]="!activeProfile()?.isAdvisor"
+                class="flex items-center justify-center space-x-1.5 py-2 px-3 rounded-lg border text-xs font-semibold transition-all duration-300 disabled:opacity-40"
+                [ngClass]="{
+                  'bg-slate-100 text-slate-800 border-slate-600 font-bold': activeChannel() === 'CenterCall',
+                  'bg-white text-slate-600 border-slate-200 hover:bg-slate-50': activeChannel() !== 'CenterCall'
+                }">
+          <span>📞</span>
+          <span>CenterCall</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner de Estado de la API Key -->
+    <div class="p-3.5 rounded-xl border text-xs bg-white border-slate-200 shadow-sm"
+         [ngClass]="{
+           'bg-emerald-50 border-emerald-200 text-emerald-800': apiKey(),
+           'bg-amber-50 border-amber-200 text-amber-800': !apiKey()
+         }">
+      @if (apiKey()) {
+        <div class="flex items-center space-x-2">
+          <span class="text-emerald-600 text-base">🟢</span>
+          <span class="font-semibold">Claude API Conectada</span>
+        </div>
+        <p class="text-3xs opacity-80 mt-1 leading-normal">Respuestas en vivo con Claude 3.5 Sonnet directas del frontend.</p>
+      } @else {
+        <div class="flex items-center space-x-2">
+          <span class="text-amber-500 text-base">🟡</span>
+          <span class="font-bold">Modo Simulación Inteligente</span>
+        </div>
+        <p class="text-3xs opacity-80 mt-1 leading-normal">Sin API Key. Usando el cerebro local con respuestas de alta fidelidad para la demo.</p>
+      }
+    </div>
+  </div>
+
+  <!-- PANEL DERECHO: Ventana de Chat (8 columnas en LG) -->
+  <div class="lg:col-span-8 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-full">
+
+    <!-- CABECERA DEL CHAT (Varía dinámicamente según el canal) -->
+    <div class="p-4 flex items-center justify-between shrink-0 transition-all duration-500"
+         [ngClass]="{
+           'bg-[#075E54] text-white': activeChannel() === 'WhatsApp',
+           'bg-[#2481CC] text-white': activeChannel() === 'Telegram',
+           'bg-[#1E4D8C] text-white': activeChannel() === 'Web',
+           'bg-slate-800 text-white border-b-2 border-[#C00000]': activeChannel() === 'CenterCall'
+         }">
+      <div class="flex items-center space-x-3">
+        <!-- Icono de Canal -->
+        <div class="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-lg shadow-inner">
+          @if (activeChannel() === 'WhatsApp') { 💬 }
+          @else if (activeChannel() === 'Telegram') { ✈️ }
+          @else if (activeChannel() === 'Web') { 🌐 }
+          @else { 📞 }
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5">
+            <h2 class="text-xs font-black tracking-wide">
+              @if (activeChannel() === 'CenterCall') {
+                [Copiloto] Ser — Asistente Interno 360
+              } @else {
+                Ser — Asistente Banco Serfinanza
+              }
+            </h2>
+            <!-- Estado en Vivo -->
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            </span>
+          </div>
+          <p class="text-3xs opacity-80 font-semibold mt-0.5">
+            @if (activeChannel() === 'CenterCall') {
+              Consola Inteligente de Soporte • Asesor Conectado
+            } @else {
+              Canal verificado • Responde en segundos
+            }
+          </p>
+        </div>
+      </div>
+      
+      <!-- Detalle de Canal badge -->
+      <span class="bg-white/15 px-3 py-1 rounded-full text-3xs font-extrabold tracking-widest uppercase">
+        {{ activeChannel() }}
+      </span>
+    </div>
+
+    <!-- AREA DE MENSAJES (Con estilos dinámicos de fondo por canal) -->
+    <div #chatScrollContainer 
+         class="flex-1 overflow-y-auto p-4 space-y-4 transition-all duration-500 relative"
+         [ngClass]="{
+           'bg-[#E5DDD5]': activeChannel() === 'WhatsApp',
+           'bg-[#F4F6F8]': activeChannel() === 'Telegram',
+           'bg-slate-50': activeChannel() === 'Web',
+           'bg-slate-900 border-x border-slate-800 font-mono': activeChannel() === 'CenterCall'
+         }">
+      
+      <!-- Marca de agua de fondo solo en canales móviles -->
+      @if (activeChannel() === 'WhatsApp') {
+        <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]"></div>
+      } @else if (activeChannel() === 'Telegram') {
+        <div class="absolute inset-0 opacity-5 pointer-events-none bg-[linear-gradient(45deg,#000_25%,transparent_25%,transparent_75%,#000_75%,#000),linear-gradient(45deg,#000_25%,transparent_25%,transparent_75%,#000_75%,#000)] bg-[size:20px_20px] bg-[position:0_0,10px_10px]"></div>
+      }
+
+      <!-- Listado de Mensajes -->
+      <div class="space-y-4 relative z-10">
+        @for (msg of chatHistory(); track msg.timestamp) {
+          <div class="flex" [ngClass]="{ 'justify-end': msg.role === 'user', 'justify-start': msg.role === 'assistant' }">
+            
+            <!-- Contenedor del Globo -->
+            <div class="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-3 shadow-xs transition-all duration-300 relative group"
+                 [ngClass]="{
+                   'bg-[#DCF8C6] text-slate-800 rounded-tr-none': msg.role === 'user' && activeChannel() === 'WhatsApp',
+                   'bg-white text-slate-800 rounded-tl-none': msg.role === 'assistant' && activeChannel() === 'WhatsApp',
+                   
+                   'bg-[#EFFDDE] text-slate-800 rounded-tr-none border border-[#c3f295]': msg.role === 'user' && activeChannel() === 'Telegram',
+                   'bg-white text-slate-800 rounded-tl-none border border-slate-100': msg.role === 'assistant' && activeChannel() === 'Telegram',
+                   
+                   'bg-[#1E4D8C] text-white rounded-tr-none': msg.role === 'user' && activeChannel() === 'Web',
+                   'bg-[#F1F5F9] text-slate-800 rounded-tl-none': msg.role === 'assistant' && activeChannel() === 'Web',
+                   
+                   'bg-[#C00000] text-white rounded-none border-l-4 border-white': msg.role === 'user' && activeChannel() === 'CenterCall',
+                   'bg-slate-800 text-emerald-400 rounded-none border-l-4 border-emerald-400 font-mono': msg.role === 'assistant' && activeChannel() === 'CenterCall'
+                 }">
+              
+              <!-- Remitente (Solo en modo copiloto/CenterCall) -->
+              @if (activeChannel() === 'CenterCall') {
+                <span class="block text-4xs uppercase font-extrabold tracking-widest opacity-60 mb-1">
+                  {{ msg.role === 'user' ? 'Asesor (Juliana)' : 'Copiloto de IA' }}
+                </span>
+              }
+
+              <!-- Contenido del Mensaje -->
+              <p class="text-xs sm:text-xs leading-relaxed whitespace-pre-line" [innerHTML]="msg.content"></p>
+              
+              <!-- Estampilla de Tiempo -->
+              <span class="block text-4xs text-right mt-1.5 opacity-60 font-medium">
+                {{ msg.timestamp | date:'h:mm a' }}
+              </span>
+
+              <!-- Botones Quick-Reply Dinámicos (solo en mensajes del Bot) -->
+              @if (!noButtons() && msg.role === 'assistant' && msg.buttons && msg.buttons.length > 0) {
+                <div class="mt-3 flex flex-wrap gap-1.5 pt-2 border-t"
+                     [ngClass]="{
+                       'border-slate-100': activeChannel() !== 'CenterCall',
+                       'border-slate-700': activeChannel() === 'CenterCall'
+                     }">
+                  @for (btn of msg.buttons; track btn) {
+                    <button (click)="triggerScenario(btn)" 
+                            [disabled]="isTyping()"
+                            class="text-3xs font-bold py-1.5 px-3 rounded-lg border transition-all duration-300 shadow-2xs cursor-pointer"
+                            [ngClass]="{
+                              'bg-white hover:bg-slate-150 text-emerald-700 border-slate-200': activeChannel() === 'WhatsApp',
+                              'bg-white hover:bg-slate-100 text-sky-700 border-slate-200': activeChannel() === 'Telegram',
+                              'bg-[#1E4D8C] hover:bg-blue-800 text-white border-transparent': activeChannel() === 'Web',
+                              'bg-slate-700 hover:bg-slate-600 text-emerald-400 border-slate-600': activeChannel() === 'CenterCall'
+                            }">
+                      {{ btn }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Indicador de Escribiendo (Typing Indicator) -->
+        @if (isTyping()) {
+          <div class="flex justify-start">
+            <div class="rounded-2xl px-4 py-3.5 shadow-xs flex items-center space-x-1.5 transition-all duration-300"
+                 [ngClass]="{
+                   'bg-white text-slate-800 rounded-tl-none': activeChannel() === 'WhatsApp' || activeChannel() === 'Telegram',
+                   'bg-[#F1F5F9] text-slate-800 rounded-tl-none': activeChannel() === 'Web',
+                   'bg-slate-800 text-emerald-400 rounded-none border-l-4 border-emerald-400': activeChannel() === 'CenterCall'
+                 }">
+              @if (activeChannel() === 'CenterCall') {
+                <span class="text-4xs uppercase font-extrabold tracking-widest opacity-60 mr-2 font-mono">Procesando RAG...</span>
+              }
+              <div class="flex items-center space-x-1 shrink-0 h-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 0ms"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 150ms"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 300ms"></span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- AREA DE ENTRADA DE TEXTO -->
+    <form (ngSubmit)="sendUserMessage()" 
+          class="p-3 bg-slate-50 border-t border-slate-200 flex items-center space-x-2 shrink-0">
+      
+      <!-- Entrada -->
+      <input type="text" 
+             [(ngModel)]="userMessageText" 
+             name="userInput"
+             [disabled]="isTyping()"
+             placeholder="Escribe un mensaje al asistente..."
+             class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1E4D8C]/50 focus:border-[#1E4D8C] transition-all disabled:opacity-50" />
+      
+      <!-- Botón Enviar -->
+      <button type="submit" 
+              [disabled]="!userMessageText.trim() || isTyping()"
+              class="h-9 px-4 rounded-xl text-xs font-bold text-white transition-all duration-300 shrink-0 shadow-sm flex items-center justify-center space-x-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              [ngClass]="{
+                'bg-[#075E54] hover:bg-[#128C7E]': activeChannel() === 'WhatsApp',
+                'bg-[#2481CC] hover:bg-[#0088CC]': activeChannel() === 'Telegram',
+                'bg-[#1E4D8C] hover:bg-blue-800': activeChannel() === 'Web',
+                'bg-slate-800 border border-slate-700 hover:bg-slate-700': activeChannel() === 'CenterCall'
+              }">
+        <span>Enviar</span>
+        <span>✈️</span>
+      </button>
+    </form>
+
+  </div>
+</div>

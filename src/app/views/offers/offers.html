@@ -1,0 +1,212 @@
+<div class="space-y-6">
+  <!-- Encabezado de Vista -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Motor de Ofertas Personalizadas</h1>
+      <p class="text-slate-500 text-sm">Configuración de triggers comerciales y campañas cruzadas (Banca + Olímpica) para clientes de Banco Serfinanza.</p>
+    </div>
+    
+    <button (click)="showCreateModal.set(true)" 
+            class="bg-[#1E4D8C] hover:bg-blue-800 text-white font-extrabold text-xs py-2.5 px-4 rounded-xl shadow-sm border border-transparent transition-all flex items-center space-x-1.5 self-start sm:self-auto cursor-pointer">
+      <span>➕</span>
+      <span>Crear Nueva Oferta</span>
+    </button>
+  </div>
+
+  <!-- Alerta de Notificaciones -->
+  @if (actionAlert()) {
+    <div class="p-4 bg-emerald-55 border border-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-between text-xs font-semibold animate-pulse">
+      <span>{{ actionAlert() }}</span>
+      <button (click)="actionAlert.set(null)" class="text-slate-400 hover:text-slate-650 text-sm cursor-pointer">✕</button>
+    </div>
+  }
+
+  <!-- SECCIÓN SUPERIOR: Cuadrícula de Ofertas Activas -->
+  <div>
+    <div class="flex items-center space-x-2 mb-4">
+      <span class="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
+      <h2 class="text-xs font-black text-slate-700 uppercase tracking-wider">Campañas y Ofertas Vigentes ({{ offers().length }})</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      @for (offer of offers(); track offer.id) {
+        <div class="bg-white rounded-2xl border p-5 transition-all duration-300 shadow-2xs hover:shadow-md flex flex-col justify-between"
+             [ngClass]="{
+               'border-slate-200 ring-1 ring-slate-100 bg-white': offer.isActive,
+               'border-slate-200 opacity-60 bg-slate-50/50': !offer.isActive
+             }">
+          
+          <!-- Cabecera Tarjeta: Título y Prioridad -->
+          <div>
+            <div class="flex items-start justify-between">
+              <span class="inline-block bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-4xs font-bold uppercase tracking-wide">
+                Prioridad: {{ offer.priority }}
+              </span>
+              
+              <!-- Checkbox Toggle Activo -->
+              <button (click)="toggleOfferStatus(offer.id)"
+                      class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                      [ngClass]="offer.isActive ? 'bg-emerald-500' : 'bg-slate-300'">
+                <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      [ngClass]="offer.isActive ? 'translate-x-4' : 'translate-x-0'"></span>
+              </button>
+            </div>
+
+            <!-- Título y Descripción -->
+            <h3 class="text-xs font-extrabold text-slate-800 mt-3 truncate">{{ offer.title }}</h3>
+            <p class="text-3xs text-slate-550 mt-1.5 leading-normal line-clamp-2 h-8">{{ offer.description }}</p>
+          </div>
+
+          <!-- Metadatos de Trigger, Segmento y Canal -->
+          <div class="mt-4 space-y-2 border-t border-slate-100 pt-3 text-4xs font-semibold text-slate-500">
+            <div>
+              <span class="text-slate-400 block uppercase font-extrabold tracking-wider">Segmento Objetivo</span>
+              <span class="text-slate-750 font-bold block truncate mt-0.5">{{ offer.targetSegment }}</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <span class="text-slate-400 block uppercase font-extrabold tracking-wider">Canal</span>
+                <span class="text-slate-750 font-bold block truncate mt-0.5">{{ offer.channel }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block uppercase font-extrabold tracking-wider">{{ offer.metricLabel }}</span>
+                <span class="text-emerald-700 font-extrabold block truncate mt-0.5">{{ offer.metricValue }}</span>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-slate-400 block uppercase font-extrabold tracking-wider">Condición Operativa</span>
+              <code class="text-3xs font-mono text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded block truncate mt-1">
+                {{ offer.triggerCondition }}
+              </code>
+            </div>
+          </div>
+
+          <!-- Botón de Previsualización (Demo Path) -->
+          <div class="mt-5 pt-3 border-t border-slate-100">
+            <button (click)="previewInChat(offer)" 
+                    [disabled]="!offer.isActive"
+                    class="w-full py-1.5 px-3 rounded-lg border text-3xs font-extrabold text-[#1E4D8C] border-[#1E4D8C] hover:bg-[#1E4D8C] hover:text-white transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center space-x-1">
+              <span>💬</span>
+              <span>Probar en Chat</span>
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- SECCIÓN INFERIOR: Conversión por Segmento (Chart.js) -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-base font-bold text-slate-800">Tasa de Conversión por Segmento</h2>
+        <p class="text-slate-500 text-xs mt-0.5">Efectividad de entrega y aceptación de ofertas cognitivas durante esta semana.</p>
+      </div>
+      <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-2xs font-semibold">Semana en Curso</span>
+    </div>
+
+    <!-- Canvas para Chart.js -->
+    <div class="h-72 relative">
+      <canvas #conversionChart></canvas>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAR NUEVA OFERTA -->
+  @if (showCreateModal()) {
+    <div class="fixed inset-0 z-50 overflow-hidden flex items-center justify-center" role="dialog" aria-modal="true">
+      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" (click)="showCreateModal.set(false)"></div>
+      
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden relative z-10 animate-fade-in flex flex-col justify-between">
+        <!-- Cabecera -->
+        <div class="p-6 bg-slate-50 border-b flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-black text-slate-800">Crear Nueva Oferta Comercial</h3>
+            <p class="text-4xs text-slate-400 uppercase font-extrabold tracking-wider">Añadir trigger cognitivo al motor central</p>
+          </div>
+          <button (click)="showCreateModal.set(false)" class="text-slate-400 hover:text-slate-650 text-lg cursor-pointer">✕</button>
+        </div>
+
+        <!-- Formulario -->
+        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+          
+          <!-- Título -->
+          <div class="space-y-1.5">
+            <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Título de la Oferta (Banco / Olímpica)</label>
+            <input type="text" [(ngModel)]="newOfferTitle" placeholder="Ej. 🥩 25% Viernes de Carnes"
+                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+          </div>
+
+          <!-- Descripción -->
+          <div class="space-y-1.5">
+            <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Descripción Comercial</label>
+            <textarea [(ngModel)]="newOfferDesc" rows="2" placeholder="Describe los beneficios y condiciones para el cliente..."
+                      class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]"></textarea>
+          </div>
+
+          <!-- Segmento Objetivo -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Segmento Objetivo</label>
+              <select [(ngModel)]="newOfferSegment"
+                      class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]">
+                @for (seg of segments; track seg) {
+                  <option [value]="seg">{{ seg }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Canal -->
+            <div class="space-y-1.5">
+              <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Canal Preferido</label>
+              <select [(ngModel)]="newOfferChannel"
+                      class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]">
+                @for (ch of channels; track ch) {
+                  <option [value]="ch">{{ ch }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Trigger / Condición -->
+          <div class="space-y-1.5">
+            <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Trigger de Activación (Lógica)</label>
+            <input type="text" [(ngModel)]="newOfferTrigger" placeholder="Ej. Compras en Olímpica > 3 veces el último mes"
+                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+          </div>
+
+          <!-- Prioridad y Estado Activo -->
+          <div class="grid grid-cols-2 gap-4 items-center">
+            <div class="space-y-1.5">
+              <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Prioridad (1 Máxima - 5 Baja)</label>
+              <input type="number" [(ngModel)]="newOfferPriority" min="1" max="5"
+                     class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+            </div>
+
+            <div class="flex items-center space-x-3 mt-4">
+              <input type="checkbox" [(ngModel)]="newOfferActive" id="activeCheckbox"
+                     class="h-4 w-4 rounded border-slate-350 text-[#1E4D8C] focus:ring-[#1E4D8C]" />
+              <label for="activeCheckbox" class="text-3xs font-extrabold text-slate-650 uppercase tracking-wider cursor-pointer">Activa de Inmediato</label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Pie -->
+        <div class="p-6 bg-slate-50 border-t flex items-center justify-end space-x-2">
+          <button (click)="showCreateModal.set(false)" 
+                  class="py-2 px-4 rounded-lg border text-2xs font-extrabold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+            Cancelar
+          </button>
+          <button (click)="saveNewOffer()" 
+                  [disabled]="!newOfferTitle || !newOfferDesc"
+                  class="py-2 px-4 rounded-lg bg-[#1E4D8C] text-white hover:bg-blue-800 font-extrabold text-2xs transition-all cursor-pointer disabled:opacity-50">
+            Crear y Habilitar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

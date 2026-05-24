@@ -1,0 +1,581 @@
+<div class="space-y-6">
+  <!-- Encabezado de Vista -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Panel de Control General</h1>
+      <p class="text-slate-500 text-sm">Monitoreo en tiempo real de agentes cognitivos e integraciones de Banco Serfinanza.</p>
+    </div>
+    <div class="flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-emerald-100 self-start md:self-auto">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      </span>
+      <span>Actualización en vivo cada 8s (±5% var)</span>
+    </div>
+  </div>
+
+  <!-- Fila de Tarjetas KPI -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <!-- Card 1: Conversaciones Activas -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-[#1E4D8C]"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Conversaciones Activas</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-slate-800 tracking-tight transition-all duration-500">{{ kpis().activeConversations | number }}</span>
+      </div>
+      <p class="text-slate-500 text-xs mt-2 flex items-center">
+        <span class="text-emerald-500 font-bold mr-1">↑ 4.2%</span> vs hora anterior
+      </p>
+    </div>
+
+    <!-- Card 2: Resolución Primer Contacto -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-[#C00000]"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Resolución 1er Contacto</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ kpis().firstContactResolution }}%</span>
+      </div>
+      <p class="text-slate-500 text-xs mt-2 flex items-center">
+        <span class="text-emerald-500 font-bold mr-1">↑ 1.5%</span> meta (85%)
+      </p>
+    </div>
+
+    <!-- Card 3: Tiempo Promedio de Respuesta -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-amber-500"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Tiempo de Respuesta</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ kpis().avgResponseTime }}s</span>
+      </div>
+      <p class="text-slate-500 text-xs mt-2 flex items-center">
+        <span class="text-emerald-500 font-bold mr-1">↓ 0.2s</span> optimización de RAG
+      </p>
+    </div>
+
+    <!-- Card 4: Escalamiento Humano -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-violet-600"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Escalamientos a Humano</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ kpis().humanEscalations }}%</span>
+      </div>
+      <p class="text-slate-500 text-xs mt-2 flex items-center">
+        <span class="text-emerald-500 font-bold mr-1">↓ 0.8%</span> retención del bot
+      </p>
+    </div>
+
+    <!-- Card 5: Satisfacción CSAT -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Satisfacción CSAT</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ kpis().csat }} <span class="text-lg text-slate-400">/ 5.0</span></span>
+      </div>
+      <p class="text-slate-500 text-xs mt-2 flex items-center">
+        <span class="text-amber-500 font-bold mr-1">★ 4.6</span> promedio general
+      </p>
+    </div>
+  </div>
+
+  <!-- Sección Intermedia: Gráfico + Alertas Recientes -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Gráfico de Canales (2/3 de ancho en pantallas grandes) -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-bold text-slate-800">Distribución de Volumen por Canal</h2>
+          <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-2xs font-semibold">Últimas 24 horas</span>
+        </div>
+        <p class="text-slate-500 text-xs mb-6">Porcentaje de interacciones procesadas exitosamente por canal de comunicación.</p>
+      </div>
+      <div class="h-64 relative">
+        <canvas #channelChart></canvas>
+      </div>
+    </div>
+
+    <!-- Panel de Alertas en Vivo (1/3 de ancho) -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-bold text-slate-800">Alertas Operativas</h2>
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+        </div>
+        <p class="text-slate-500 text-xs mb-4">Notificaciones del estado actual de servicios y agentes cognitivos.</p>
+        
+        <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
+          @for (alert of alerts(); track alert.id) {
+            <div class="p-3.5 rounded-xl border flex items-start space-x-3 transition-all duration-300"
+                 [ngClass]="{
+                   'bg-red-50 border-red-100 text-red-800': alert.severity === 'red',
+                   'bg-amber-50 border-amber-100 text-amber-800': alert.severity === 'amber',
+                   'bg-emerald-50 border-emerald-100 text-emerald-800': alert.severity === 'green'
+                 }">
+              <div class="mt-0.5">
+                @if (alert.severity === 'red') {
+                  <span class="text-red-600 text-lg">🔴</span>
+                } @else if (alert.severity === 'amber') {
+                  <span class="text-amber-500 text-lg">🟡</span>
+                } @else {
+                  <span class="text-emerald-500 text-lg">🟢</span>
+                }
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold leading-relaxed break-words">{{ alert.message }}</p>
+                <span class="text-2xs opacity-75 block mt-1">{{ alert.timeAgo }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN: HUMAN IN THE LOOP (HITL) PARA PROCESOS DE AGENTE AUTÓNOMO -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-slate-100 pb-5 mb-6 gap-4">
+      <div>
+        <div class="flex items-center space-x-2.5">
+          <div class="p-2 bg-blue-50 text-[#1E4D8C] rounded-xl">
+            <span class="text-xl">🤝</span>
+          </div>
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-800 tracking-tight flex items-center">
+              Supervisión de Procesos Autónomos
+              <span class="ml-2.5 px-2 py-0.5 bg-[#C00000]/10 text-[#C00000] rounded-full text-3xs font-extrabold tracking-widest uppercase">
+                Human in the Loop
+              </span>
+            </h2>
+            <p class="text-slate-500 text-xs mt-0.5">Acciones de alta prioridad propuestas por agentes cognitivos que requieren revisión o firma digital del operador.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selectores de Tab (Filtro HITL) -->
+      <div class="flex bg-slate-100 p-1 rounded-xl self-start lg:self-auto">
+        <button (click)="hitlFilter.set('pending')"
+                class="px-4 py-2 rounded-lg text-2xs font-extrabold transition-all cursor-pointer"
+                [ngClass]="hitlFilter() === 'pending' ? 'bg-white text-[#1E4D8C] shadow-xs' : 'text-slate-500 hover:text-slate-800'">
+          Cola de Espera
+          <span class="ml-1 bg-[#C00000] text-white text-3xs px-1.5 py-0.5 rounded-full font-black">
+            {{ hitlTasks().filter(t => t.status === 'pending').length }}
+          </span>
+        </button>
+        <button (click)="hitlFilter.set('history')"
+                class="px-4 py-2 rounded-lg text-2xs font-extrabold transition-all cursor-pointer"
+                [ngClass]="hitlFilter() === 'history' ? 'bg-white text-[#1E4D8C] shadow-xs' : 'text-slate-500 hover:text-slate-800'">
+          Historial de Acciones
+          <span class="ml-1 bg-slate-200 text-slate-600 text-3xs px-1.5 py-0.5 rounded-full font-black">
+            {{ hitlTasks().filter(t => t.status !== 'pending').length }}
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de Tareas Filtradas -->
+    @if (getFilteredTasks().length === 0) {
+      <div class="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+        <span class="text-4xl">🎉</span>
+        <h3 class="text-sm font-bold text-slate-700 mt-3">¡No hay tareas en esta sección!</h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-sm">Los agentes autónomos están operando de forma óptima y las solicitudes reguladas ya han sido auditadas.</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        @for (task of getFilteredTasks(); track task.id) {
+          <div class="bg-[#F8FAFC]/55 hover:bg-[#F8FAFC] border border-slate-200 rounded-2xl p-5 transition-all duration-300 flex flex-col justify-between group relative shadow-2xs hover:shadow-xs">
+            <!-- Badge Confianza y Tipo -->
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-2.5 py-1 bg-white border border-slate-200 text-slate-750 font-bold rounded-lg text-3xs flex items-center space-x-1">
+                @if (task.taskType === 'Actualización de Dirección') { 📍 }
+                @else if (task.taskType === 'Aumento de Cupo') { 💳 }
+                @else if (task.taskType === 'Exención de Tasa') { 📈 }
+                @else { 📣 }
+                <span>{{ task.taskType }}</span>
+              </span>
+
+              <div class="flex items-center space-x-2">
+                <span class="text-3xs font-extrabold text-slate-400">Confianza IA:</span>
+                <span class="px-2 py-0.5 rounded-md text-3xs font-extrabold"
+                      [ngClass]="{
+                        'bg-emerald-100 text-emerald-800 border border-emerald-200': task.confidence >= 95,
+                        'bg-blue-100 text-blue-800 border border-blue-200': task.confidence < 95 && task.confidence >= 90
+                      }">
+                  {{ task.confidence }}%
+                </span>
+              </div>
+            </div>
+
+            <!-- Contenido -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="text-xs font-black text-slate-800 tracking-tight">{{ task.clientName }}</h3>
+                  <p class="text-4xs text-[#1E4D8C] uppercase font-extrabold tracking-wider mt-0.5">{{ task.clientSegment }}</p>
+                </div>
+                <span class="text-4xs font-semibold text-slate-400 self-start">{{ task.timeAgo }}</span>
+              </div>
+
+              <p class="text-slate-550 text-xs leading-relaxed line-clamp-2 mt-1">{{ task.description }}</p>
+
+              <!-- Comparación de Datos -->
+              <div class="bg-white border border-slate-100 rounded-xl p-3 mt-3.5 space-y-1.5 text-xs shadow-3xs">
+                @if (task.originalValue && task.originalValue !== 'Ninguno') {
+                  <div class="flex items-baseline space-x-2">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase w-14 shrink-0">Anterior:</span>
+                    <span class="text-slate-450 line-through truncate">{{ task.originalValue }}</span>
+                  </div>
+                }
+                <div class="flex items-baseline space-x-2">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase w-14 shrink-0">Propuesto:</span>
+                  <span class="text-[#1E4D8C] font-black truncate">{{ task.proposedValue }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Card / Botones -->
+            <div class="mt-5 pt-4 border-t border-slate-150 flex items-center justify-between">
+              <!-- Info del Agente Proponente -->
+              <div class="flex items-center space-x-1.5">
+                <span class="text-3xs text-slate-400 font-semibold">Propuesto por:</span>
+                <span class="text-3xs font-extrabold text-[#1E4D8C]">{{ task.agentName }}</span>
+              </div>
+
+              <!-- Acciones Pendientes -->
+              @if (task.status === 'pending') {
+                <div class="flex items-center space-x-2">
+                  <button (click)="openHITLDetail(task)"
+                          class="py-1.5 px-3 rounded-lg bg-[#1E4D8C] hover:bg-blue-800 text-white font-extrabold text-3xs transition-all cursor-pointer">
+                    Auditar Acción
+                  </button>
+                  <button (click)="approveTask(task)"
+                          class="p-1.5 rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 text-xs transition-all cursor-pointer font-bold leading-none"
+                          title="Aprobar instantáneamente">
+                    ✓
+                  </button>
+                  <button (click)="rejectTask(task)"
+                          class="p-1.5 rounded-lg border border-red-200 text-red-650 hover:bg-red-50 text-xs transition-all cursor-pointer font-bold leading-none"
+                          title="Rechazar instantáneamente">
+                    ✕
+                  </button>
+                </div>
+              } @else {
+                <!-- Decisiones Tomadas (Historial) -->
+                <div class="flex items-center space-x-1.5">
+                  @if (task.status === 'approved') {
+                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-md text-3xs font-black flex items-center space-x-1">
+                      <span>✓</span> <span>AUTORIZADO</span>
+                    </span>
+                  } @else {
+                    <span class="bg-rose-50 text-red-650 border border-red-100 px-2 py-0.5 rounded-md text-3xs font-black flex items-center space-x-1">
+                      <span>✕</span> <span>RECHAZADO</span>
+                    </span>
+                  }
+                  <!-- Botón Ver Detalles Historial -->
+                  <button (click)="openHITLDetail(task)"
+                          class="p-1.5 rounded-lg border text-slate-500 hover:bg-slate-50 text-3xs font-bold transition-all cursor-pointer">
+                    Ver Bitácora
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- DETALLE MODAL HITL / PANEL DE AUDITORÍA -->
+  @if (selectedHITLTask()) {
+    <div class="fixed inset-0 z-50 overflow-hidden flex items-center justify-center" role="dialog" aria-modal="true">
+      <!-- Backdrop blur -->
+      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" (click)="closeHITLDetail()"></div>
+      
+      <!-- Contenedor Modal -->
+      <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full mx-4 overflow-hidden relative z-10 animate-fade-in flex flex-col justify-between">
+        
+        <!-- Cabecera Auditoría -->
+        <div class="p-6 bg-slate-50 border-b flex items-center justify-between border-slate-200">
+          <div class="flex items-center space-x-3">
+            <span class="text-xl">🛡️</span>
+            <div>
+              <h3 class="text-sm font-black text-slate-800">Panel de Auditoría y Control HITL</h3>
+              <p class="text-4xs text-slate-400 uppercase font-extrabold tracking-wider">Verificación de Procesos Autónomos con IA</p>
+            </div>
+          </div>
+          <button (click)="closeHITLDetail()" class="text-slate-400 hover:text-slate-650 text-lg cursor-pointer">✕</button>
+        </div>
+
+        <!-- Cuerpo del Modal (2 columnas) -->
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
+          <!-- Columna Izquierda: Información de Contexto -->
+          <div class="space-y-4">
+            <div>
+              <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Cliente Afectado</span>
+              <div class="mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                <p class="text-xs font-bold text-slate-850">{{ selectedHITLTask()?.clientName }}</p>
+                <p class="text-4xs text-[#1E4D8C] uppercase font-extrabold tracking-wider mt-0.5">{{ selectedHITLTask()?.clientSegment }}</p>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Agente Proponente e IA Core</span>
+              <div class="mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5">
+                <div class="flex items-center justify-between text-3xs font-semibold">
+                  <span class="text-slate-550">Agente Autónomo:</span>
+                  <span class="font-extrabold text-[#1E4D8C]">{{ selectedHITLTask()?.agentName }}</span>
+                </div>
+                <div class="flex items-center justify-between text-3xs font-semibold">
+                  <span class="text-slate-550">Documento RAG Base:</span>
+                  <span class="font-extrabold text-slate-700 truncate max-w-[140px]" [title]="selectedHITLTask()?.ragDocUsed">{{ selectedHITLTask()?.ragDocUsed }}</span>
+                </div>
+                <div class="flex items-center justify-between text-3xs font-semibold">
+                  <span class="text-slate-550">Certeza Algorítmica:</span>
+                  <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-100">{{ selectedHITLTask()?.confidence }}%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diálogo o Transcripción de Contexto -->
+            <div>
+              <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Evidencia y Diálogo de Soporte</span>
+              <div class="mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                <p class="text-3xs italic text-slate-600 leading-relaxed">
+                  {{ selectedHITLTask()?.transcriptDialog }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Validación de Datos y Firma -->
+          <div class="space-y-4">
+            <!-- Reproductor de Audio Simulado (Solo para notas de voz, ej: dirección) -->
+            @if (selectedHITLTask()?.userSpeechAudio) {
+              <div>
+                <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Firma de Consentimiento por Audio</span>
+                <div class="mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between shadow-3xs">
+                  <div class="flex items-center space-x-3">
+                    <button (click)="toggleAudio()"
+                            class="w-10 h-10 rounded-full flex items-center justify-center text-xs shadow-sm bg-[#1E4D8C] text-white hover:bg-blue-800 transition-all cursor-pointer leading-none">
+                      @if (isPlayingAudio()) { ⏸ } @else { ▶ }
+                    </button>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[10px] font-bold text-slate-750">nota_de_voz_serfinanza.wav</p>
+                      <p class="text-4xs text-slate-400 mt-0.5">Capturado hace 3 minutos • 0:14 seg</p>
+                    </div>
+                  </div>
+
+                  <!-- Waveform Simulado -->
+                  <div class="mt-3 h-8 flex items-center space-x-0.5 relative bg-white border border-slate-100 rounded-lg px-2 overflow-hidden">
+                    <div class="w-full h-full flex items-center justify-between opacity-80">
+                      <div class="w-0.5 bg-slate-200 rounded-sm" [style.height.%]="20"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="60"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="40"></div>
+                      <div class="w-0.5 bg-slate-200 rounded-sm" [style.height.%]="80"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="30"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="70"></div>
+                      <div class="w-0.5 bg-slate-200 rounded-sm" [style.height.%]="50"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="90"></div>
+                      <div class="w-0.5 bg-slate-200 rounded-sm" [style.height.%]="20"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="60"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="40"></div>
+                      <div class="w-0.5 bg-slate-200 rounded-sm" [style.height.%]="80"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="30"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="70"></div>
+                      <div class="w-0.5 bg-slate-200 rounded-sm" [style.height.%]="50"></div>
+                      <div class="w-0.5 bg-[#1E4D8C] rounded-sm" [style.height.%]="90"></div>
+                    </div>
+                    <!-- Overlay Progress Slider -->
+                    <div class="absolute left-0 top-0 bottom-0 bg-[#1E4D8C]/15 transition-all duration-150 pointer-events-none"
+                         [style.width.%]="audioProgress()"></div>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Cambios de Campos -->
+            <div>
+              <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Auditoría del Cambio Propuesto</span>
+              <div class="mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                @if (selectedHITLTask()?.originalValue && selectedHITLTask()?.originalValue !== 'Ninguno') {
+                  <div>
+                    <span class="text-4xs font-bold text-slate-400 uppercase block">Valor Actual en Core:</span>
+                    <span class="text-xs font-semibold text-slate-600 leading-relaxed block mt-0.5 truncate">{{ selectedHITLTask()?.originalValue }}</span>
+                  </div>
+                }
+                <div>
+                  <span class="text-4xs font-bold text-[#1E4D8C] uppercase block">Nuevo Valor Propuesto por Agente:</span>
+                  <span class="text-xs font-extrabold text-slate-800 leading-relaxed block mt-0.5 break-all">{{ selectedHITLTask()?.proposedValue }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Entrada de Notas del Operador / Estado Final -->
+            @if (selectedHITLTask()?.status === 'pending') {
+              <div>
+                <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Comentarios del Operador (Opcional)</span>
+                <textarea [(ngModel)]="operatorNotesInput"
+                          placeholder="Ingresa notas de verificación o justificación si es necesario..."
+                          class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C] mt-1.5 h-16 resize-none shadow-3xs"></textarea>
+              </div>
+            } @else {
+              <!-- Bitácora del Operador Guardada -->
+              <div>
+                <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Bitácora de Firma Guardada</span>
+                <div class="mt-1.5 p-3.5 bg-slate-100 rounded-2xl border border-slate-200">
+                  <p class="text-3xs font-bold text-slate-700">Notas de Auditoría:</p>
+                  <p class="text-3xs text-slate-600 mt-1 italic">"{{ selectedHITLTask()?.operatorNotes }}"</p>
+                  <div class="mt-2.5 flex items-center space-x-1.5 text-4xs font-semibold text-slate-400">
+                    <span>Auditado por:</span>
+                    <span class="font-extrabold text-[#1E4D8C]">Operador Principal (ID: OP-421)</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Pie de Modal / Botones de Decisión -->
+        <div class="p-6 bg-slate-50 border-t flex items-center justify-between border-slate-250">
+          <button (click)="closeHITLDetail()" 
+                  class="py-2 px-4 rounded-xl border border-slate-200 text-2xs font-extrabold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+            Cerrar Ventana
+          </button>
+          
+          @if (selectedHITLTask()?.status === 'pending') {
+            <div class="flex items-center space-x-2">
+              <button (click)="rejectTask(selectedHITLTask()!)" 
+                      class="py-2 px-4 rounded-xl bg-red-650 hover:bg-red-750 text-white font-extrabold text-2xs transition-all cursor-pointer">
+                Rechazar Acción
+              </button>
+              <button (click)="approveTask(selectedHITLTask()!)" 
+                      class="py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-2xs transition-all cursor-pointer">
+                Aprobar y Ejecutar
+              </button>
+            </div>
+          } @else {
+            <div class="flex items-center space-x-2">
+              <span class="text-3xs text-slate-400 font-semibold">Estado de la firma:</span>
+              <span class="px-2.5 py-1 text-3xs font-extrabold rounded-lg uppercase tracking-wider"
+                    [ngClass]="selectedHITLTask()?.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-red-750 border border-red-200'">
+                {{ selectedHITLTask()?.status === 'approved' ? 'AUTORIZADO' : 'RECHAZADO' }}
+              </span>
+            </div>
+          }
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- Sección Inferior: Fichas de Salud de Agentes e Integraciones -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <!-- Tabla 1: Agentes Internos -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
+      <div>
+        <div class="p-6 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <div class="p-1.5 bg-blue-50 text-[#1E4D8C] rounded-lg">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h2 class="text-base font-bold text-slate-800">Agentes Cognitivos Internos</h2>
+          </div>
+          <p class="text-slate-500 text-xs mt-1">Estado, precisión en respuestas y rendimiento del pool de agentes de IA.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 text-2xs font-bold uppercase border-b border-slate-100">
+                <th class="py-3 px-6">Agente</th>
+                <th class="py-3 px-6">Dominio</th>
+                <th class="py-3 px-6 text-right">Consultas hoy</th>
+                <th class="py-3 px-6 text-right">Precisión</th>
+                <th class="py-3 px-6 text-right">Latencia</th>
+                <th class="py-3 px-6 text-center">Estado</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+              @for (agent of internalAgents(); track agent.name) {
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="py-3.5 px-6 font-bold text-[#1E4D8C]">{{ agent.name }}</td>
+                  <td class="py-3.5 px-6 text-slate-500">{{ agent.domain }}</td>
+                  <td class="py-3.5 px-6 text-right font-semibold">{{ agent.queriesToday | number }}</td>
+                  <td class="py-3.5 px-6 text-right">
+                    <span class="px-2 py-0.5 rounded text-2xs font-bold" 
+                          [ngClass]="{
+                            'bg-emerald-50 text-emerald-700': agent.accuracy >= 94,
+                            'bg-amber-50 text-amber-700': agent.accuracy < 94 && agent.accuracy >= 90,
+                            'bg-red-50 text-red-700': agent.accuracy < 90
+                          }">{{ agent.accuracy }}%</span>
+                  </td>
+                  <td class="py-3.5 px-6 text-right text-slate-500 font-mono">{{ agent.latency }}</td>
+                  <td class="py-3.5 px-6 text-center">
+                    @if (agent.status === 'OK') {
+                      <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full text-3xs font-semibold">✅ OK</span>
+                    } @else {
+                      <span class="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-full text-3xs font-semibold animate-pulse">⚠️ Revisar</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla 2: Integraciones Externas -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
+      <div>
+        <div class="p-6 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <div class="p-1.5 bg-rose-50 text-[#C00000] rounded-lg">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <h2 class="text-base font-bold text-slate-800">Integraciones y APIs Externas</h2>
+          </div>
+          <p class="text-slate-500 text-xs mt-1">Conectividad, volumen de llamadas y latencia de cores de negocio y canales.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 text-2xs font-bold uppercase border-b border-slate-100">
+                <th class="py-3 px-6">Servicio</th>
+                <th class="py-3 px-6">Tipo</th>
+                <th class="py-3 px-6 text-right">Llamadas hoy</th>
+                <th class="py-3 px-6 text-right">Éxito</th>
+                <th class="py-3 px-6 text-right">Latencia</th>
+                <th class="py-3 px-6 text-center">Estado</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+              @for (int of externalIntegrations(); track int.name) {
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="py-3.5 px-6 font-bold text-slate-800">{{ int.name }}</td>
+                  <td class="py-3.5 px-6 text-slate-500">{{ int.type }}</td>
+                  <td class="py-3.5 px-6 text-right font-semibold">{{ int.callsToday | number }}</td>
+                  <td class="py-3.5 px-6 text-right">
+                    <span class="px-2 py-0.5 rounded text-2xs font-bold bg-emerald-50 text-emerald-700">{{ int.success }}%</span>
+                  </td>
+                  <td class="py-3.5 px-6 text-right text-slate-500 font-mono">{{ int.latency }}</td>
+                  <td class="py-3.5 px-6 text-center">
+                    @if (int.status === 'OK') {
+                      <span class="text-emerald-500 font-bold">● Activo</span>
+                    } @else {
+                      <span class="text-amber-500 font-bold animate-pulse">● Alta Latencia</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

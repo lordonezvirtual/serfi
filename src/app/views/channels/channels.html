@@ -1,0 +1,340 @@
+<div class="space-y-6 relative overflow-hidden min-h-screen pb-12">
+  <!-- Encabezado de Vista -->
+  <div>
+    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Gestión de Canales</h1>
+    <p class="text-slate-500 text-sm">Administra la conexión y aprovisionamiento de canales de mensajería integrados con Agente 360.</p>
+  </div>
+
+  <!-- SECCIÓN CANALES EN VIVO (LIVE) -->
+  <div>
+    <div class="flex items-center space-x-2 mb-4">
+      <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <h2 class="text-xs font-black text-slate-700 uppercase tracking-wider">Canales Activos (LIVE)</h2>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      @for (channel of channels(); track channel.id) {
+        @if (channel.status === 'live') {
+          <div class="bg-white rounded-2xl border p-5 transition-all duration-300 shadow-2xs hover:shadow-md flex flex-col justify-between"
+               [ngClass]="{
+                 'border-emerald-200 ring-2 ring-emerald-500/5': channel.isActive,
+                 'border-slate-200 opacity-65 bg-slate-50/50': !channel.isActive
+               }">
+            
+            <!-- Encabezado Tarjeta -->
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-lg border">
+                  {{ channel.icon }}
+                </div>
+                <div>
+                  <h3 class="text-xs font-bold text-slate-800">{{ channel.name }}</h3>
+                  <span class="inline-block px-2 py-0.5 rounded-full text-4xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wide mt-1">LIVE</span>
+                </div>
+              </div>
+              
+              <!-- Indicator Dot -->
+              <span class="h-2 w-2 rounded-full" [ngClass]="channel.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+            </div>
+
+            <!-- Métricas y Uptime -->
+            <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-3xs font-semibold text-slate-500">
+              <div>
+                <p class="text-4xs text-slate-400 uppercase font-extrabold tracking-wider">Tráfico</p>
+                <p class="text-slate-700 mt-0.5">{{ channel.metric }}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-4xs text-slate-400 uppercase font-extrabold tracking-wider">Uptime 24h</p>
+                <p class="text-slate-700 mt-0.5">{{ channel.uptime }}</p>
+              </div>
+            </div>
+
+            <!-- Sparkline (Últimas 24h) -->
+            <div class="mt-4 h-10 flex items-end justify-between">
+              <div class="flex-1 mr-2 min-w-0">
+                <p class="text-4xs text-slate-400 uppercase font-extrabold tracking-wider mb-1.5">Frecuencia (24h)</p>
+                <svg class="w-full h-8 overflow-visible" viewBox="0 0 120 30" preserveAspectRatio="none">
+                  <path [attr.d]="getSparklinePath(channel.sparklineData)" 
+                        fill="none" 
+                        [attr.stroke]="channel.isActive ? '#10B981' : '#94A3B8'" 
+                        stroke-width="2.5" 
+                        stroke-linecap="round"></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3.5">
+              <button (click)="openConfig(channel)" 
+                      class="py-1.5 px-3 rounded-lg border text-3xs font-extrabold text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer">
+                ⚙️ Configurar
+              </button>
+              
+              <button (click)="toggleChannel(channel)" 
+                      class="py-1.5 px-3 rounded-lg border text-3xs font-extrabold transition-all cursor-pointer"
+                      [ngClass]="{
+                        'border-red-200 text-red-700 hover:bg-red-50': channel.isActive,
+                        'border-emerald-200 text-emerald-700 hover:bg-emerald-50': !channel.isActive
+                      }">
+                {{ channel.isActive ? '⏸️ Pausar' : '▶️ Reanudar' }}
+              </button>
+            </div>
+
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- SECCIÓN CANALES EN PRUEBAS (BETA) -->
+  <div>
+    <div class="flex items-center space-x-2 mb-4">
+      <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+      <h2 class="text-xs font-black text-slate-700 uppercase tracking-wider">Modo Beta / Sandbox</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      @for (channel of channels(); track channel.id) {
+        @if (channel.status === 'beta') {
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-lg border">
+                  {{ channel.icon }}
+                </div>
+                <div>
+                  <h3 class="text-xs font-bold text-slate-800">{{ channel.name }}</h3>
+                  <span class="inline-block px-2 py-0.5 rounded-full text-4xs font-bold bg-amber-100 text-amber-800 uppercase tracking-wide mt-1">BETA</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-slate-500 text-3xs mt-4 leading-normal">
+              @if (channel.id === 'ig') {
+                Respuestas a comentarios y DMs directos de Instagram con scoring comercial integrado.
+              } @else if (channel.id === 'email') {
+                Buzón de correo inteligente. Redacta borradores autónomos y respuestas automáticas.
+              } @else {
+                Notificaciones salientes proactivas (SMS transaccionales y de cobro) vía API masiva.
+              }
+            </p>
+
+            <div class="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3.5">
+              <button (click)="openConfig(channel)" 
+                      class="py-1.5 px-3 rounded-lg border text-3xs font-extrabold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">
+                ⚙️ Configurar
+              </button>
+              
+              <button (click)="activateBeta(channel)" 
+                      class="py-1.5 px-3 rounded-lg border text-3xs font-extrabold bg-[#1E4D8C] text-white hover:bg-blue-800 border-transparent transition-all cursor-pointer">
+                🚀 Activar
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- SECCIÓN PLANIFICADOS (PLANNED) -->
+  <div>
+    <div class="flex items-center space-x-2 mb-4">
+      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+      <h2 class="text-xs font-black text-slate-700 uppercase tracking-wider">Planificados en Roadmap</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (channel of channels(); track channel.id) {
+        @if (channel.status === 'planned') {
+          <div class="bg-slate-50/50 rounded-2xl border border-slate-200 border-dashed p-4 flex items-center justify-between opacity-75">
+            <div class="flex items-center space-x-3.5">
+              <span class="text-lg filter grayscale">{{ channel.icon }}</span>
+              <div>
+                <h3 class="text-xs font-bold text-slate-750">{{ channel.name }}</h3>
+                <span class="inline-block px-1.5 py-0.5 rounded text-4xs font-bold bg-slate-100 text-slate-600 uppercase tracking-wide mt-0.5">Próximamente</span>
+              </div>
+            </div>
+            <span class="text-3xs font-semibold text-slate-400 font-mono">Q3 2026</span>
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- PANEL DESLIZANTE DE CONFIGURACIÓN (SLIDE-OVER PANEL) -->
+  @if (isDrawerOpen()) {
+    <div class="fixed inset-0 z-50 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+      <!-- Backdrop blur overlay -->
+      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" (click)="closeDrawer()"></div>
+
+      <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+        <!-- Panel content -->
+        <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between transform transition-all duration-300">
+          
+          <!-- Cabecera Panel -->
+          <div class="p-6 bg-slate-50 border-b flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <span class="text-xl">{{ selectedChannel()?.icon }}</span>
+              <div>
+                <h3 class="text-sm font-black text-slate-800" id="slide-over-title">
+                  Configuración: {{ selectedChannel()?.name }}
+                </h3>
+                <p class="text-4xs text-slate-400 uppercase font-extrabold tracking-wider">Ajustes Técnicos</p>
+              </div>
+            </div>
+            <button (click)="closeDrawer()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          </div>
+
+          <!-- Cuerpo Panel -->
+          <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            
+            <!-- Campo Webhook URL -->
+            <div class="space-y-1.5">
+              <label class="block text-2xs font-extrabold text-slate-700 uppercase tracking-wider">Webhook URL</label>
+              <div class="flex items-center space-x-1.5">
+                <input type="text" [value]="webhookUrl" readonly
+                       class="flex-1 bg-slate-50 border rounded-lg px-3 py-2 text-2xs font-mono text-slate-500 focus:outline-none" />
+                <button (click)="saveConfig()" class="bg-slate-100 hover:bg-slate-200 border text-3xs font-extrabold p-2 rounded-lg cursor-pointer">Copiar</button>
+              </div>
+              <p class="text-4xs text-slate-400">Endpoint para recibir eventos de mensajería entrantes en tiempo real.</p>
+            </div>
+
+            <!-- Campo Token de Seguridad -->
+            <div class="space-y-1.5">
+              <label class="block text-2xs font-extrabold text-slate-700 uppercase tracking-wider">Token de Seguridad (API Key)</label>
+              <input type="password" [value]="apiToken" readonly
+                     class="w-full bg-slate-50 border rounded-lg px-3 py-2 text-2xs font-mono text-slate-500 focus:outline-none" />
+              <p class="text-4xs text-slate-400">Token de portadora (Bearer) encriptado para autorizar peticiones entrantes.</p>
+            </div>
+
+            <!-- Configuración Específica de Meta WhatsApp Cloud API -->
+            @if (selectedChannel()?.id === 'wa') {
+              <div class="space-y-4 bg-slate-50/50 p-4.5 rounded-xl border border-slate-200">
+                <h4 class="text-xs font-black text-slate-800 flex items-center space-x-2">
+                  <span>💬</span>
+                  <span class="uppercase tracking-wider text-2xs">Meta Cloud API Config</span>
+                </h4>
+                <div class="space-y-3.5">
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Phone Number ID</label>
+                    <input type="text" [(ngModel)]="cloudPhoneId"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">WhatsApp Business Account ID (WABA)</label>
+                    <input type="text" [(ngModel)]="cloudAccountId"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Access Token (Permanent)</label>
+                    <input type="password" [(ngModel)]="cloudAccessToken"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Configuración Específica de Twilio WhatsApp -->
+            @if (selectedChannel()?.id === 'twilio') {
+              <div class="space-y-4 bg-red-50/30 p-4.5 rounded-xl border border-red-200/50">
+                <h4 class="text-xs font-black text-red-700 flex items-center space-x-2">
+                  <span>🔴</span>
+                  <span class="uppercase tracking-wider text-2xs">Twilio Gateway Credentials</span>
+                </h4>
+                <div class="space-y-3.5">
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Account SID</label>
+                    <input type="text" [(ngModel)]="twilioAccountSid"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Auth Token</label>
+                    <input type="password" [(ngModel)]="twilioAuthToken"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Número Remitente Twilio</label>
+                    <input type="text" [(ngModel)]="twilioSender"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Configuración Específica de Infobip WhatsApp -->
+            @if (selectedChannel()?.id === 'infobip') {
+              <div class="space-y-4 bg-amber-50/30 p-4.5 rounded-xl border border-amber-200/50">
+                <h4 class="text-xs font-black text-amber-700 flex items-center space-x-2">
+                  <span>⚡</span>
+                  <span class="uppercase tracking-wider text-2xs">Infobip Gateway Settings</span>
+                </h4>
+                <div class="space-y-3.5">
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">API Key</label>
+                    <input type="password" [(ngModel)]="infobipApiKey"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Base URL API</label>
+                    <input type="text" [(ngModel)]="infobipBaseUrl"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Remitente Aprobado (Sender Name)</label>
+                    <input type="text" [(ngModel)]="infobipSender"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Plantilla de Mensaje Predeterminada -->
+            <div class="space-y-1.5">
+              <label class="block text-2xs font-extrabold text-slate-700 uppercase tracking-wider">Plantilla de Mensaje de Bienvenida</label>
+              <textarea [(ngModel)]="templateText" rows="3"
+                        class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]"></textarea>
+              <p class="text-4xs text-slate-400">Sección editable que define el comportamiento del mensaje inicial en variables Mustache.</p>
+            </div>
+
+            <!-- Probador de Envíos en Vivo (SMS / WhatsApp) -->
+            <div class="bg-slate-50 border rounded-xl p-4.5 space-y-4">
+              <h4 class="text-xs font-bold text-slate-800">Probador de Mensajes en Vivo</h4>
+              
+              <div class="space-y-2">
+                <label class="block text-3xs font-extrabold text-slate-600 uppercase tracking-wider">Número Celular (Destino)</label>
+                <input type="text" [(ngModel)]="testPhoneNumber" placeholder="+57 300 000 0000"
+                       class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+              </div>
+
+              <button (click)="sendTestMessage()" 
+                      [disabled]="!testPhoneNumber"
+                      class="w-full bg-slate-850 hover:bg-slate-900 text-white font-extrabold text-2xs py-2 px-3 rounded-lg shadow-sm border border-transparent transition-all cursor-pointer disabled:opacity-50">
+                📤 Enviar Mensaje de Prueba
+              </button>
+
+              @if (testSuccessMessage()) {
+                <div class="p-3 bg-emerald-55 border border-emerald-100 text-emerald-800 rounded-lg text-3xs font-semibold leading-relaxed">
+                  {{ testSuccessMessage() }}
+                </div>
+              }
+            </div>
+
+          </div>
+
+          <!-- Pie Panel -->
+          <div class="p-6 bg-slate-50 border-t flex items-center justify-end space-x-2">
+            <button (click)="closeDrawer()" 
+                    class="py-2 px-4 rounded-lg border text-2xs font-extrabold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer">
+              Cancelar
+            </button>
+            <button (click)="saveConfig()" 
+                    class="py-2 px-4 rounded-lg bg-[#1E4D8C] text-white hover:bg-blue-800 font-extrabold text-2xs transition-all cursor-pointer">
+              Guardar Cambios
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  }
+</div>
