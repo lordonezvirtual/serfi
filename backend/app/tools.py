@@ -45,14 +45,39 @@ def get_client_crm_profile(client_id: str) -> Dict[str, Any]:
     Recupera los datos del cliente desde la base de datos CRM. 
     Contiene información de contacto, edad, segmento y productos activos.
     """
-    # Intentar obtener de PostgREST o retornar mock estructurado
     url = f"{POSTGREST_URL}/clientes"
     params = {"id": f"eq.{client_id}"}
     
     try:
         response = requests.get(url, params=params, timeout=3.0)
-        if response.status_code == 200 and response.json():
-            return response.json()[0]
+        if response.status_code == 200 and response.json() and len(response.json()) > 0:
+            client_data = response.json()[0]
+            
+            # Normalizar nombres de campos para soporte bilingüe (CRM vs DB)
+            client_data["name"] = client_data.get("nombre", "Cliente")
+            client_data["age"] = client_data.get("edad", 35)
+            client_data["city"] = client_data.get("ciudad", "Cali")
+            client_data["segment"] = client_data.get("segmento", "Estándar")
+            client_data["seniority"] = client_data.get("antiguedad", "0 años")
+            
+            # Consultar productos del cliente para poblar la lista dinámica
+            products = []
+            try:
+                # 1. Cuentas
+                r_cuentas = requests.get(f"{POSTGREST_URL}/cuentas", params={"cliente_id": f"eq.{client_id}"}, timeout=2.0)
+                if r_cuentas.status_code == 200:
+                    for c in r_cuentas.json():
+                        products.append(c.get("tipo_cuenta", "Cuenta"))
+                # 2. Tarjetas
+                r_tarjetas = requests.get(f"{POSTGREST_URL}/tarjetas", params={"cliente_id": f"eq.{client_id}"}, timeout=2.0)
+                if r_tarjetas.status_code == 200:
+                    for t in r_tarjetas.json():
+                        products.append(t.get("tipo_tarjeta", "Tarjeta"))
+            except Exception:
+                pass
+                
+            client_data["products"] = list(set(products)) if products else ["Cuenta Ahorros"]
+            return client_data
     except Exception:
         pass
         
@@ -61,10 +86,15 @@ def get_client_crm_profile(client_id: str) -> Dict[str, Any]:
         "maria": {
             "id": "maria",
             "name": "María Amparo Gutiérrez",
+            "nombre": "María Amparo Gutiérrez",
             "age": 62,
+            "edad": 62,
             "city": "Cali",
+            "ciudad": "Cali",
             "segment": "Adulto Mayor",
+            "segmento": "Adulto Mayor",
             "seniority": "14 años",
+            "antiguedad": "14 años",
             "products": ["Cuenta Ahorros", "Tarjeta Olimpica", "SuperCDT"],
             "preferredChannel": "WhatsApp",
             "tag": "No usa app"
@@ -72,16 +102,21 @@ def get_client_crm_profile(client_id: str) -> Dict[str, Any]:
         "carlos": {
             "id": "carlos",
             "name": "Carlos Herrera Díaz",
+            "nombre": "Carlos Herrera Díaz",
             "age": 38,
+            "edad": 38,
             "city": "Barranquilla",
+            "ciudad": "Barranquilla",
             "segment": "Digital Activo",
+            "segmento": "Digital Activo",
             "seniority": "6 años",
+            "antiguedad": "6 años",
             "products": ["Cuenta Ahorros", "Tarjeta Crédito", "CDT $8M"],
             "preferredChannel": "Telegram",
             "tag": "Cliente frecuente Olimpica"
         }
     }
-    return profiles.get(client_id.lower(), {"id": client_id, "name": "Cliente Desconocido", "segment": "Estándar", "products": []})
+    return profiles.get(client_id.lower(), {"id": client_id, "name": "Cliente Desconocido", "nombre": "Cliente Desconocido", "segment": "Estándar", "segmento": "Estándar", "products": []})
 
 
 # --- 3. TOOL: Calcular scoring de crédito ---
@@ -94,18 +129,45 @@ def calculate_credit_scoring(client_id: str) -> str:
     name = profile.get("name", "Cliente")
     segment = profile.get("segment", "General")
     
+    # Intentar obtener cupo y deuda de la tarjeta real del cliente
+    cupo_actual = None
+    deuda_actual = None
+    porcentaje_uso = 0.0
+    try:
+        r_tarjetas = requests.get(f"{POSTGREST_URL}/tarjetas", params={"cliente_id": f"eq.{client_id}"}, timeout=2.0)
+        if r_tarjetas.status_code == 200 and r_tarjetas.json():
+            card = r_tarjetas.json()[0]
+            cupo_actual = float(card.get("cupo_aprobado", 0))
+            deuda_actual = float(card.get("deuda_actual", 0))
+            if cupo_actual > 0:
+                porcentaje_uso = (deuda_actual / cupo_actual) * 100
+    except Exception:
+        pass
+
     # Lógica de scoring en base a la antigüedad y segmento
     if segment == "Adulto Mayor":
         scoring = "A+ (Excelente historial de pago en Olímpica)"
-        max_increase = "$1,500,000 COP"
+        if cupo_actual is not None:
+            increase_val = int(cupo_actual * 0.3)  # 30% increase
+            max_increase = f"${increase_val:,} COP"
+        else:
+            max_increase = "$1,500,000 COP"
         status = "Pre-aprobado disponible"
-    elif segment == "Digital Activo":
-        scoring = "AAA (Uso del 65% del cupo actual, sin moras)"
-        max_increase = "$3,000,000 COP"
+    elif segment == "Digital Activo" or segment == "endeudado_consumidor" or porcentaje_uso > 60:
+        scoring = f"AAA (Uso del {porcentaje_uso:.1f}% del cupo actual, sin moras)" if cupo_actual else "AAA (Excelente uso y comportamiento)"
+        if cupo_actual is not None:
+            increase_val = int(cupo_actual * 0.3)
+            max_increase = f"${increase_val:,} COP"
+        else:
+            max_increase = "$3,000,000 COP"
         status = "Pre-aprobado de cupo liberado"
     else:
         scoring = "B (Historial estándar)"
-        max_increase = "$500,000 COP"
+        if cupo_actual is not None:
+            increase_val = int(cupo_actual * 0.1)  # 10% increase for standard
+            max_increase = f"${increase_val:,} COP"
+        else:
+            max_increase = "$500,000 COP"
         status = "Requiere análisis adicional"
         
     return f"Resultado Scoring para {name} ({client_id}):\n- Calificación: {scoring}\n- Estado de Cupo: {status}\n- Aumento Máximo Sugerido: {max_increase}"
@@ -164,6 +226,62 @@ def get_active_promotions(day_of_week: str, segment: str) -> str:
     """
     Retorna las ofertas comerciales activas en el catálogo de Olímpica para un segmento y día de la semana específicos.
     """
+    url = f"{POSTGREST_URL}/ofertas"
+    params = {
+        "esta_activa": "eq.true"
+    }
+    
+    try:
+        response = requests.get(url, params=params, timeout=3.0)
+        if response.status_code == 200:
+            ofertas = response.json()
+            if not ofertas:
+                return "No hay promociones específicas programadas para hoy."
+            
+            results = []
+            for p in ofertas:
+                seg_obj = p.get("segmento_objetivo", "Todos")
+                cond = p.get("condicion_disparo", "Todos")
+                
+                # Validar coincidencia de día según la condición de disparo
+                day_match = True
+                cond_lower = cond.lower()
+                day_lower = day_of_week.lower()
+                if "miércoles" in cond_lower and day_lower != "miércoles":
+                    day_match = False
+                elif "viernes" in cond_lower and day_lower != "viernes":
+                    day_match = False
+                elif "sábado" in cond_lower and day_lower != "sábado":
+                    day_match = False
+                elif "fin de semana" in cond_lower and day_lower not in ["sábado", "domingo"]:
+                    day_match = False
+                
+                # Validar coincidencia de segmento objetivo
+                seg_match = False
+                seg_obj_lower = seg_obj.lower()
+                segment_lower = segment.lower()
+                if (seg_obj_lower == "todos" or 
+                    segment_lower == "todos" or 
+                    seg_obj_lower in segment_lower or 
+                    segment_lower in seg_obj_lower or
+                    (segment_lower == "adulto mayor" and seg_obj_lower == "todos") or
+                    ("tarjeta" in seg_obj_lower and ("adulto" in segment_lower or "digital" in segment_lower or "tarjeta" in segment_lower))):
+                    seg_match = True
+                
+                if day_match and seg_match:
+                    results.append(f"- {p.get('titulo')}: {p.get('descripcion')}")
+            
+            if not results:
+                return "No hay promociones específicas programadas para hoy, pero puedes utilizar tus descuentos de Tarjeta Olímpica del 10% diario en toda la tienda."
+                
+            return "Promociones vigentes:\n" + "\n".join(results)
+        else:
+            return _get_mock_promotions(day_of_week, segment)
+    except Exception:
+        return _get_mock_promotions(day_of_week, segment)
+
+
+def _get_mock_promotions(day_of_week: str, segment: str) -> str:
     promos = [
         {"title": "Miércoles de Plaza", "desc": "30% descuento en frutas y verduras de Olímpica pagando con Tarjeta Olímpica.", "day": "Miércoles", "segment": "Todos"},
         {"title": "Sábado Madrugón", "desc": "30% de descuento en electrodomésticos seleccionados.", "day": "Sábado", "segment": "Todos"},
@@ -182,6 +300,7 @@ def get_active_promotions(day_of_week: str, segment: str) -> str:
         return "No hay promociones específicas programadas para hoy, pero puedes utilizar tus descuentos de Tarjeta Olímpica del 10% diario en toda la tienda."
         
     return "Promociones vigentes:\n" + "\n".join(results)
+
 
 
 # --- AUXILIAR: Transacciones sintéticas ---

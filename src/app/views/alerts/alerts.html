@@ -1,0 +1,595 @@
+<div class="space-y-6">
+  
+  <!-- Encabezado de Vista -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+    <div>
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl">🚨</span>
+        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Monitoreo de Alertas Omnicanal</h1>
+      </div>
+      <p class="text-slate-500 text-sm">Consola centralizada para gestionar incidentes, caídas de servicio y notificaciones de contingencia.</p>
+    </div>
+    <div class="flex items-center space-x-2 bg-[#C00000]/10 text-[#C00000] px-4 py-2 rounded-xl text-xs font-black border border-[#C00000]/20 self-start md:self-auto shadow-2xs">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-[#C00000]"></span>
+      </span>
+      <span>SISTEMA DE CONTINGENCIA ACTIVO</span>
+    </div>
+  </div>
+
+  <!-- Fila de Tarjetas KPI de Alertas -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Card 1: Total Activas -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-[#1E4D8C]"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Alertas Totales</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ getActiveAlertCount() }}</span>
+        <span class="text-xs text-slate-450 font-semibold">activas en vivo</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Críticas (Rojas) -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-red-650"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Gravedad Crítica</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-red-650 tracking-tight">{{ getActiveAlertCount('red') }}</span>
+        <span class="text-xs font-bold text-red-700 bg-red-50 border border-red-100 px-2 py-0.5 rounded-md animate-pulse ml-2">S.O.S</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Advertencias (Amarillas) -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-amber-500"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Advertencias</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-amber-500 tracking-tight">{{ getActiveAlertCount('amber') }}</span>
+        <span class="text-xs text-slate-450 font-semibold">revisión recomendada</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Uptime Global Promedio -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Uptime Canales (24h)</p>
+      <div class="flex items-baseline space-x-2 mt-2">
+        <span class="text-3xl font-extrabold text-emerald-600 tracking-tight">97.6%</span>
+        <span class="text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md">ESTABLE</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grilla de Estado Físico de Canales (Pulse Indicators) -->
+  <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-md border border-slate-800">
+    <h2 class="text-sm font-black uppercase tracking-wider text-slate-400 mb-4 flex items-center">
+      <span>🩺 Estado de Salud por Canales y Microservicios</span>
+      <span class="ml-auto text-[10px] text-slate-500 lowercase">haga clic en un canal para filtrar</span>
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+      @for (ch of getChannelStatus(); track ch.name) {
+        <button (click)="selectedFilterChannel.set(selectedFilterChannel() === ch.name ? 'Todos' : ch.name)"
+                [ngClass]="{
+                  'bg-slate-800 border-slate-700 shadow-lg text-white scale-102 ring-1 ring-[#1E4D8C]': selectedFilterChannel() === ch.name,
+                  'bg-slate-950/50 border-slate-900 hover:bg-slate-800/40': selectedFilterChannel() !== ch.name
+                }"
+                class="p-4 rounded-xl border flex flex-col items-center justify-between text-center transition-all duration-300 relative cursor-pointer group">
+          
+          <!-- Pulse Dot -->
+          <div class="absolute top-3 right-3">
+            <span class="relative flex h-2.5 w-2.5">
+              @if (ch.status === 'critical') {
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+              } @else if (ch.status === 'warning') {
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              } @else {
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              }
+            </span>
+          </div>
+
+          <span class="text-2xl mt-1">{{ ch.icon }}</span>
+          <span class="text-2xs font-extrabold tracking-tight mt-2 block">{{ ch.name }}</span>
+          
+          <div class="mt-3.5 space-y-1 w-full">
+            <div class="text-[10px] text-slate-400 font-semibold">Uptime: <strong class="text-white">{{ ch.uptime }}</strong></div>
+            <div class="text-4xs font-black uppercase px-2 py-0.5 rounded-full inline-block"
+                 [ngClass]="{
+                   'bg-red-950 text-red-400 border border-red-900': ch.status === 'critical',
+                   'bg-amber-950 text-amber-400 border border-amber-900': ch.status === 'warning',
+                   'bg-emerald-950 text-emerald-400 border border-emerald-900': ch.status === 'optimal'
+                 }">
+              {{ ch.status === 'critical' ? ch.activeAlerts + ' ALERTA' : ch.status === 'warning' ? 'ATENCIÓN' : 'OPERATIVO' }}
+            </div>
+          </div>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Panel Principal: Lista de Alertas + Simulador de Incidentes -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    
+    <!-- COLUMNA IZQUIERDA Y CENTRAL: Alertas Operativas (2/3 de ancho) -->
+    <div class="xl:col-span-2 space-y-4">
+      
+      <!-- Controles de Filtros -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-3xs">
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Filtro de Canal:</span>
+          <select [(ngModel)]="selectedFilterChannel" (ngModelChange)="selectedFilterChannel.set($event)"
+                  class="bg-slate-50 border rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]">
+            <option value="Todos">🌐 Todos los Canales</option>
+            <option value="Web">🌐 Web</option>
+            <option value="Móvil">📱 Móvil</option>
+            <option value="WhatsApp">💬 WhatsApp</option>
+            <option value="PSE">⚡ PSE</option>
+            <option value="CenterCall">📞 CenterCall</option>
+            <option value="Base de Datos">📊 Base de Datos</option>
+            <option value="Seguridad">🔒 Seguridad</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Gravedad:</span>
+          <div class="flex bg-slate-100 p-0.5 rounded-lg border">
+            <button (click)="selectedFilterSeverity.set('Todos')"
+                    [ngClass]="selectedFilterSeverity() === 'Todos' ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-750 font-semibold'"
+                    class="px-3 py-1 rounded text-3xs transition-all cursor-pointer">Todas</button>
+            <button (click)="selectedFilterSeverity.set('red')"
+                    [ngClass]="selectedFilterSeverity() === 'red' ? 'bg-red-50 text-red-700 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-red-650 font-semibold'"
+                    class="px-3 py-1 rounded text-3xs transition-all cursor-pointer">Crítica</button>
+            <button (click)="selectedFilterSeverity.set('amber')"
+                    [ngClass]="selectedFilterSeverity() === 'amber' ? 'bg-amber-50 text-amber-700 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-amber-600 font-semibold'"
+                    class="px-3 py-1 rounded text-3xs transition-all cursor-pointer">Advertencia</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Tarjetas de Alertas -->
+      <div class="space-y-4">
+        @if (getFilteredAlerts().length === 0) {
+          <div class="bg-white border border-dashed rounded-3xl p-12 text-center flex flex-col items-center justify-center">
+            <span class="text-4xl">🍀</span>
+            <h3 class="text-sm font-bold text-slate-750 mt-3">¡No se encontraron alertas en este filtro!</h3>
+            <p class="text-xs text-slate-400 mt-1 max-w-sm">El canal seleccionado no presenta alertas activas o se encuentra funcionando dentro de los parámetros de latencia óptimos.</p>
+          </div>
+        } @else {
+          @for (alert of getFilteredAlerts(); track alert.id) {
+            <div class="bg-white rounded-2xl border transition-all duration-300 flex flex-col justify-between shadow-sm relative overflow-hidden group"
+                 [ngClass]="{
+                   'border-red-200 hover:border-red-300 ring-1 ring-red-50/50 shadow-red-50/20': alert.severity === 'red' && alert.status === 'active',
+                   'border-amber-250 hover:border-amber-300 shadow-amber-50/10': alert.severity === 'amber' && alert.status === 'active',
+                   'border-slate-200 hover:border-slate-300 opacity-70 bg-slate-50/50': alert.status === 'resolved'
+                 }">
+              
+              <!-- Glowing Pulsing Border Effect for Critical active alerts -->
+              @if (alert.severity === 'red' && alert.status === 'active') {
+                <div class="absolute inset-0 border border-red-500/20 animate-pulse pointer-events-none rounded-2xl"></div>
+              }
+
+              <!-- Cabecera de Tarjeta -->
+              <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 gap-3">
+                <div class="flex items-center space-x-2.5">
+                  <!-- Tag de Severidad -->
+                  <span class="px-2 py-1 rounded-md text-4xs font-black uppercase tracking-wider border leading-none flex items-center space-x-1"
+                        [ngClass]="{
+                          'bg-red-50 text-red-750 border-red-150': alert.severity === 'red' && alert.status === 'active',
+                          'bg-amber-50 text-amber-700 border-amber-150': alert.severity === 'amber' && alert.status === 'active',
+                          'bg-slate-100 text-slate-500 border-slate-200': alert.status === 'resolved'
+                        }">
+                    <span>{{ alert.severity === 'red' ? '🔴' : alert.severity === 'amber' ? '🟡' : '🟢' }}</span>
+                    <span>{{ alert.status === 'resolved' ? 'RESUELTO' : alert.severity === 'red' ? 'CRÍTICO' : 'ADVERTENCIA' }}</span>
+                  </span>
+
+                  <!-- ID & Canal -->
+                  <span class="text-3xs text-slate-400 font-bold">{{ alert.id }}</span>
+                  <span class="px-2 py-0.5 bg-slate-100 text-slate-600 font-extrabold rounded-md text-3xs">{{ alert.channel }}</span>
+                </div>
+
+                <div class="flex items-center space-x-2 self-start sm:self-auto">
+                  <span class="text-4xs font-bold text-slate-400">{{ alert.timeAgo }}</span>
+                  
+                  @if (alert.status === 'active') {
+                    <button (click)="resolveAlert(alert)"
+                            class="py-1 px-2.5 rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 text-4xs font-extrabold transition-all cursor-pointer">
+                      ✓ Marcar Resuelta
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Cuerpo de Tarjeta -->
+              <div class="p-5 space-y-3.5">
+                <div>
+                  <h3 class="text-xs font-black text-slate-800 tracking-tight"
+                      [ngClass]="{'line-through text-slate-450': alert.status === 'resolved'}">
+                    {{ alert.title }}
+                  </h3>
+                  <p class="text-xs text-slate-650 leading-relaxed mt-2"
+                     [ngClass]="{'text-slate-450': alert.status === 'resolved'}">
+                    {{ alert.description }}
+                  </p>
+                </div>
+
+                <!-- Equipos Sugeridos de Asignación -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-2xs">
+                  <div>
+                    <span class="text-4xs font-bold text-slate-450 uppercase block tracking-wider">Grupo de Soporte Responsable:</span>
+                    <strong class="text-slate-700 font-bold block mt-0.5">👥 {{ alert.suggestedGroup }}</strong>
+                  </div>
+
+                  <!-- Destinatarios Pre-configurados -->
+                  <div class="flex flex-wrap gap-1.5 max-w-xs">
+                    <span class="px-2 py-0.5 bg-white border rounded text-[10px] text-slate-500 font-semibold" title="Correo de grupo">
+                      📧 {{ alert.emails[0] }}
+                    </span>
+                    <span class="px-2 py-0.5 bg-white border rounded text-[10px] text-slate-500 font-semibold" title="Canal corporativo">
+                      💬 {{ alert.channels[0] }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Historial de Notificaciones de esta Alerta -->
+                @if (alert.sentStatuses.length > 0) {
+                  <div class="space-y-1.5">
+                    <span class="text-4xs font-bold text-slate-400 uppercase block tracking-wider">Notificaciones despachadas:</span>
+                    <div class="flex flex-wrap gap-2">
+                      @for (sent of alert.sentStatuses; track sent.target) {
+                        <span class="bg-emerald-50 text-emerald-800 border border-emerald-100 px-2 py-1 rounded-md text-[10px] font-black flex items-center space-x-1">
+                          <span>{{ sent.medium === 'email' ? '📧 Correo' : '💬 Canal' }} enviado a</span>
+                          <strong class="font-extrabold underline max-w-[130px] truncate" [title]="sent.target">{{ sent.target }}</strong>
+                          <span>✔</span>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Acciones de Tarjeta: Transmitir a Canales -->
+              @if (alert.status === 'active') {
+                <div class="p-4 bg-slate-50 border-t flex items-center justify-end space-x-2">
+                  <span class="text-4xs font-bold text-slate-450 uppercase mr-auto hidden sm:inline">Despachar Alerta:</span>
+                  
+                  <button (click)="openNotificationDrawer(alert, 'email')"
+                          class="py-2 px-3.5 rounded-xl border border-slate-250 bg-white hover:bg-slate-50 text-slate-650 font-extrabold text-2xs transition-all shadow-2xs cursor-pointer flex items-center space-x-1.5">
+                    <span>📧 Enviar por Correo</span>
+                  </button>
+                  
+                  <button (click)="openNotificationDrawer(alert, 'group')"
+                          class="py-2 px-3.5 rounded-xl bg-[#1E4D8C] text-white hover:bg-blue-800 font-extrabold text-2xs transition-all shadow-2xs cursor-pointer flex items-center space-x-1.5">
+                    <span>💬 Enviar a Grupos</span>
+                  </button>
+                </div>
+              }
+
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Simulador de Incidentes (1/3 de ancho) -->
+    <div class="space-y-6">
+      
+      <!-- Panel Simulador -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden relative">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-650 via-amber-500 to-[#1E4D8C]"></div>
+        
+        <div class="flex items-center space-x-2 mb-4">
+          <span class="text-lg">🔥</span>
+          <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Simulador de Incidentes</h2>
+        </div>
+        <p class="text-slate-500 text-xs leading-normal mb-5">Genera y simula la caída de servicios en vivo para probar el flujo de despacho a los grupos correspondientes.</p>
+        
+        <div class="space-y-4">
+          <!-- 1. Canal Afectado -->
+          <div class="space-y-1.5">
+            <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">1. Canal Afectado</label>
+            <select [(ngModel)]="simChannel" (ngModelChange)="onSimChannelChange()"
+                    class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs font-bold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]">
+              <option value="Web">🌐 Página Web Corporativa</option>
+              <option value="Móvil">📱 Aplicación Móvil</option>
+              <option value="WhatsApp">💬 WhatsApp Business API</option>
+              <option value="PSE">⚡ Pasarela de Pagos PSE</option>
+              <option value="CenterCall">📞 CenterCall Copilot</option>
+              <option value="Base de Datos">📊 Servidor PostgreSQL</option>
+              <option value="Seguridad">🔒 Ciberseguridad (SOC / WAF)</option>
+            </select>
+          </div>
+
+          <!-- 2. Gravedad -->
+          <div class="space-y-1.5">
+            <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">2. Gravedad del Incidente</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button (click)="simSeverity = 'red'"
+                      [ngClass]="simSeverity === 'red' ? 'bg-red-50 border-red-200 text-red-800 font-extrabold shadow-3xs' : 'bg-white border text-slate-500'"
+                      class="px-3 py-2 border rounded-xl text-3xs transition-all cursor-pointer text-center">
+                🔴 Crítico (S.O.S)
+              </button>
+              <button (click)="simSeverity = 'amber'"
+                      [ngClass]="simSeverity === 'amber' ? 'bg-amber-50 border-amber-200 text-amber-800 font-extrabold shadow-3xs' : 'bg-white border text-slate-500'"
+                      class="px-3 py-2 border rounded-xl text-3xs transition-all cursor-pointer text-center">
+                🟡 Advertencia
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Grupo Sugerido (Auto) -->
+          <div class="space-y-1.5">
+            <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">3. Grupo Responsable Sugerido</label>
+            <input type="text" [(ngModel)]="simGroup" readonly
+                   class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 cursor-not-allowed focus:outline-none" />
+          </div>
+
+          <!-- 4. Título -->
+          <div class="space-y-1.5">
+            <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">4. Título del Incidente</label>
+            <input type="text" [(ngModel)]="simTitle" placeholder="Ingresa un título claro..."
+                   class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-semibold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+          </div>
+
+          <!-- 5. Mensaje Breve (Diagnóstico) -->
+          <div class="space-y-1.5">
+            <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">5. Diagnóstico Breve (Logs)</label>
+            <input type="text" [(ngModel)]="simMessage" placeholder="Ej: Error 502 Bad Gateway..."
+                   class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-semibold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+          </div>
+
+          <!-- 6. Descripción Técnica -->
+          <div class="space-y-1.5">
+            <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">6. Descripción Completa</label>
+            <textarea [(ngModel)]="simDescription" placeholder="Detalla el impacto técnico de la caída del servicio..."
+                      class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-semibold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C] h-20 resize-none"></textarea>
+          </div>
+
+          <button (click)="triggerSimulatedAlert()"
+                  class="w-full py-2.5 px-4 rounded-xl bg-red-650 hover:bg-red-750 text-white font-extrabold text-xs transition-all shadow-md cursor-pointer text-center mt-2 flex items-center justify-center space-x-2">
+            <span>🔥 Inyectar Alerta de Canal</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SECCIÓN INFERIOR: Bitácora Histórica de Notificaciones -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden">
+    <div class="flex items-center space-x-2 mb-4 border-b border-slate-100 pb-4">
+      <span class="text-lg">📜</span>
+      <div>
+        <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Bitácora General de Notificaciones Enviadas</h2>
+        <p class="text-slate-450 text-3xs font-semibold uppercase tracking-wider">Registro de auditoría de comunicaciones de soporte y operaciones</p>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 text-slate-500 text-2xs font-bold uppercase border-b border-slate-150">
+            <th class="py-3 px-6">ID Envío</th>
+            <th class="py-3 px-6">Servicio/Incidente</th>
+            <th class="py-3 px-6">Grupo Receptor</th>
+            <th class="py-3 px-6">Medio</th>
+            <th class="py-3 px-6">Destinatario</th>
+            <th class="py-3 px-6">Notas del Operador</th>
+            <th class="py-3 px-6">Fecha/Hora</th>
+            <th class="py-3 px-6 text-center">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+          @for (log of notificationLogs(); track log.id) {
+            <tr class="hover:bg-slate-50/70 transition-colors">
+              <td class="py-3.5 px-6 font-mono font-bold text-slate-500">{{ log.id }}</td>
+              <td class="py-3.5 px-6">
+                <div class="flex items-center space-x-1.5">
+                  <span class="text-3xs" [title]="log.severity">{{ log.severity === 'red' ? '🔴' : log.severity === 'amber' ? '🟡' : '🟢' }}</span>
+                  <span class="font-bold text-slate-850 truncate max-w-[200px]" [title]="log.alertTitle">{{ log.alertTitle }}</span>
+                </div>
+              </td>
+              <td class="py-3.5 px-6 text-slate-600 font-bold">{{ log.targetGroup }}</td>
+              <td class="py-3.5 px-6">
+                <span class="px-2 py-0.5 rounded text-4xs font-black uppercase"
+                      [ngClass]="{
+                        'bg-blue-50 text-blue-800 border border-blue-150': log.medium === 'Email',
+                        'bg-violet-50 text-violet-850 border border-violet-150': log.medium === 'Slack',
+                        'bg-emerald-50 text-emerald-800 border border-emerald-150': log.medium === 'WhatsApp',
+                        'bg-indigo-50 text-indigo-800 border border-indigo-150': log.medium === 'Teams'
+                      }">
+                  {{ log.medium }}
+                </span>
+              </td>
+              <td class="py-3.5 px-6 font-mono text-slate-500 truncate max-w-[150px]" [title]="log.recipient">{{ log.recipient }}</td>
+              <td class="py-3.5 px-6 italic text-slate-500 font-semibold truncate max-w-[200px]" [title]="log.operatorNotes">"{{ log.operatorNotes }}"</td>
+              <td class="py-3.5 px-6 text-slate-500">{{ log.timestamp }}</td>
+              <td class="py-3.5 px-6 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-3xs font-black"
+                      [ngClass]="{
+                        'bg-emerald-50 text-emerald-700': log.status.includes('✔'),
+                        'bg-sky-50 text-sky-700': log.status.includes('⚡')
+                      }">
+                  {{ log.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===========================================================================
+     MODAL / CAJÓN FLOTANTE (SLIDE-OVER DRAWER): DESPACHO DE NOTIFICACIÓN
+     =========================================================================== -->
+@if (isNotificationDrawerOpen()) {
+  <div class="fixed inset-0 z-50 overflow-hidden flex justify-end" role="dialog" aria-modal="true">
+    
+    <!-- Backdrop Blur -->
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300" (click)="closeNotificationDrawer()"></div>
+    
+    <!-- Contenedor Cajón Deslizable -->
+    <div class="bg-white max-w-lg w-full h-full relative z-10 shadow-2xl flex flex-col justify-between overflow-hidden animate-slide-left border-l">
+      
+      <!-- Cabecera Cajón -->
+      <div class="p-6 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <span class="text-xl">{{ notificationMedium() === 'email' ? '📧' : '💬' }}</span>
+          <div>
+            <h3 class="text-sm font-black uppercase tracking-wider">
+              {{ notificationMedium() === 'email' ? 'Enviar Incidente por Correo' : 'Enviar Incidente a Grupo Soporte' }}
+            </h3>
+            <p class="text-4xs text-slate-400 font-extrabold uppercase mt-0.5">Protocolo de Contingencia Omnicanal</p>
+          </div>
+        </div>
+        <button (click)="closeNotificationDrawer()" class="text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
+      </div>
+
+      <!-- Cuerpo del Cajón (Scrollable) -->
+      <div class="p-6 flex-1 overflow-y-auto space-y-5">
+        
+        <!-- Info Resumida del Incidente -->
+        <div class="p-4 rounded-xl border"
+             [ngClass]="{
+               'bg-red-50/50 border-red-150': selectedAlert()?.severity === 'red',
+               'bg-amber-50/50 border-amber-150': selectedAlert()?.severity === 'amber'
+             }">
+          <div class="flex items-center space-x-2">
+            <span class="text-3xs font-bold text-slate-450">{{ selectedAlert()?.id }}</span>
+            <span class="px-2 py-0.5 rounded font-extrabold text-[10px]"
+                  [ngClass]="selectedAlert()?.severity === 'red' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'">
+              {{ selectedAlert()?.severity === 'red' ? 'INCIDENTE CRÍTICO' : 'INCIDENTE ADVERTENCIA' }}
+            </span>
+            <span class="ml-auto text-4xs font-bold text-slate-450">{{ selectedAlert()?.timeAgo }}</span>
+          </div>
+          <h4 class="text-xs font-black text-slate-800 mt-2">{{ selectedAlert()?.title }}</h4>
+          <p class="text-3xs text-slate-600 mt-1 italic">"{{ selectedAlert()?.message }}"</p>
+        </div>
+
+        <!-- Grupo Destinatario -->
+        <div class="space-y-2 bg-slate-50 border rounded-xl p-4">
+          <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">Grupo Responsable Designado</label>
+          <div class="flex items-center space-x-2">
+            <span class="text-lg">👥</span>
+            <span class="text-xs font-bold text-slate-750">{{ selectedRecipientGroup }}</span>
+          </div>
+        </div>
+
+        <!-- Configuración de Canal / Destinatario según Medio -->
+        @if (notificationMedium() === 'email') {
+          <!-- EMAIL CONFIG -->
+          <div class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">Enviar a Dirección de Grupo</label>
+              <select [(ngModel)]="selectedContactEmail"
+                      class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-semibold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]">
+                @for (email of selectedAlert()?.emails; track email) {
+                  <option [value]="email">📧 {{ email }}</option>
+                }
+                <option value="director-ti@serfinanza.com.co">📧 Escalado: director-ti&#64;serfinanza.com.co (Gerencia)</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">Asunto del Correo</label>
+              <input type="text" [(ngModel)]="emailSubject"
+                     class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-bold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">Cuerpo del Mensaje</label>
+              <textarea [(ngModel)]="emailBody"
+                        class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-semibold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] h-48 resize-none"></textarea>
+            </div>
+          </div>
+        } @else {
+          <!-- GROUP/DIGITAL MSG CONFIG -->
+          <div class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">Destino de Canal Digital</label>
+              <select [(ngModel)]="selectedContactChannel"
+                      class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-semibold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C]">
+                @for (chan of selectedAlert()?.channels; track chan) {
+                  <option [value]="chan">💬 Slack: {{ chan }}</option>
+                }
+                <option value="whatsapp-grupo-emergencias">💬 WhatsApp: Soporte Crítico Serfinanza (Grupo)</option>
+                <option value="teams-mesa-incidentes">💬 Teams: Mesa de Incidentes Copilot (Chat)</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">Mensaje a Transmitir</label>
+              <textarea [(ngModel)]="groupBody"
+                        class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-mono text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] h-48 resize-none"></textarea>
+            </div>
+          </div>
+        }
+
+        <!-- Comentarios Adicionales del Operador -->
+        <div class="space-y-1.5">
+          <label class="block text-4xs font-black text-slate-450 uppercase tracking-wider">Notas Adicionales del Operador (Opcional)</label>
+          <input type="text" [(ngModel)]="customOperatorNotes" placeholder="Ej: Adjunto diagnóstico. Priorizar revisión de Kubernetes..."
+                 class="w-full bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs font-semibold text-slate-750 focus:outline-none focus:ring-1 focus:ring-[#1E4D8C] focus:border-[#1E4D8C]" />
+        </div>
+
+      </div>
+
+      <!-- Pie del Cajón con Animación de Carga -->
+      <div class="p-6 bg-slate-50 border-t border-slate-200">
+        
+        @if (isSendingNotification()) {
+          <!-- ANIMACIÓN DE ENVÍO -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-3xs font-extrabold text-slate-500 uppercase tracking-wider">
+              <span>Transmitiendo paquete cifrado...</span>
+              <span>{{ sendProgress() }}%</span>
+            </div>
+            
+            <div class="h-2 bg-slate-200 rounded-full overflow-hidden relative shadow-3xs border">
+              <div class="h-full bg-gradient-to-r from-[#1E4D8C] to-blue-500 transition-all duration-300"
+                   [style.width.%]="sendProgress()"></div>
+            </div>
+            
+            <p class="text-4xs text-slate-400 italic">Negociando canal seguro TLS con servidor SMTP/Chat...</p>
+          </div>
+        } @else {
+          <!-- BOTONES NORMALES -->
+          <div class="flex items-center space-x-3">
+            <button (click)="closeNotificationDrawer()"
+                    class="py-2.5 px-4 rounded-xl border border-slate-200 text-slate-650 hover:bg-slate-100 font-extrabold text-2xs transition-all cursor-pointer w-1/3 text-center">
+              Cancelar
+            </button>
+            <button (click)="submitNotification()"
+                    class="py-2.5 px-4 rounded-xl bg-red-650 hover:bg-red-750 text-white font-extrabold text-2xs transition-all shadow-md cursor-pointer w-2/3 text-center flex items-center justify-center space-x-2">
+              <span>🚀 Despachar Notificación</span>
+            </button>
+          </div>
+        }
+
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ===========================================================================
+     TOAST DE NOTIFICACIÓN EXITOSA (TOP-RIGHT)
+     =========================================================================== -->
+@if (showSendSuccessToast()) {
+  <div class="fixed top-5 right-5 z-100 max-w-sm w-full bg-[#0F172A] text-white border border-emerald-500/35 rounded-2xl p-4 shadow-2xl flex items-start space-x-3 animate-slide-left">
+    <div class="p-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-lg">
+      ✔
+    </div>
+    <div class="flex-1 min-w-0">
+      <h4 class="text-2xs font-black uppercase text-emerald-400 tracking-wider">Notificación Completada</h4>
+      <p class="text-xs text-slate-300 leading-normal mt-0.5">{{ successToastMessage }}</p>
+    </div>
+    <button (click)="showSendSuccessToast.set(false)" class="text-slate-450 hover:text-white text-xs cursor-pointer">✕</button>
+  </div>
+}

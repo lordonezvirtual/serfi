@@ -1,0 +1,56 @@
+
+> serfinanza-app@0.0.0 start
+> ng serve
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names                |  Raw size
+styles.css          | styles               |  88.76 kB | 
+main.js             | main                 |  47.35 kB | 
+chunk-KUCQM7VN.js   | -                    |  33.19 kB | 
+chunk-U7T4GL72.js   | -                    |  25.07 kB | 
+chunk-VUJOFXKG.js   | -                    | 938 bytes | 
+
+                    | Initial total        | 195.31 kB
+
+Lazy chunk files    | Names                |  Raw size
+chunk-DJOXJG54.js   | knowledge            | 129.09 kB | 
+chunk-QHL3PN6B.js   | chat                 | 110.06 kB | 
+chunk-NUWGE6WB.js   | dashboard            | 103.33 kB | 
+chunk-C4STIXOV.js   | channels             |  93.67 kB | 
+chunk-LXLB6LZT.js   | geomarketing         |  93.47 kB | 
+chunk-DMNUTK5I.js   | agents-orchestration |  68.06 kB | 
+chunk-GLXDJVHI.js   | offers               |  49.78 kB | 
+
+Application bundle generation complete. [4.318 seconds] - 2026-05-25T15:55:49.320Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://localhost:4200/
+❯ Changes detected. Rebuilding...
+✔ Changes detected. Rebuilding...
+Initial chunk files | Names  | Raw size
+styles.css          | styles | 95.57 kB | 
+
+Application bundle generation complete. [0.348 seconds] - 2026-05-25T16:02:03.521Z
+
+Stylesheet update sent to client(s).
+❯ Changes detected. Rebuilding...
+✔ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  | 49.40 kB | 
+
+Application bundle generation complete. [2.397 seconds] - 2026-05-25T16:02:12.747Z
+
+Component update sent to client(s).
+❯ Changes detected. Rebuilding...
+✔ Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   |  49.52 kB | 
+
+Lazy chunk files    | Names  |  Raw size
+chunk-FOJ2CZ62.js   | alerts | 124.56 kB | 
+
+Application bundle generation complete. [0.437 seconds] - 2026-05-25T16:02:17.518Z
+
+Page reload sent to client(s).

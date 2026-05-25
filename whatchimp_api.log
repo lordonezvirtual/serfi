@@ -1,0 +1,10 @@
+2026-05-24 09:00:04,594 - INFO - Iniciando conexión con la API de Whatchimp...
+2026-05-24 09:00:04,595 - INFO - URL de destino: https://app.whatchimp.com/api/v1/whatsapp/send
+2026-05-24 09:00:04,595 - INFO - Payload de envío: {'apiToken': '20661|IV...7de7d9a9', 'phone_number_id': '1003836066152965', 'phone_number': '573043344722', 'message': '¡Hola! Esta es una prueba automatizada en Python con todos los campos llenos.'}
+2026-05-24 09:00:05,693 - INFO - Respuesta recibida. Código de estado HTTP: 200
+2026-05-24 09:00:05,693 - INFO - ¡Conexión y envío exitosos!
+2026-05-24 09:00:05,693 - INFO - Respuesta detallada de la API:
+{
+    "status": "0",
+    "message": "Sending message outside 24 hour window is not allowed. You can only send template message to this user."
+}

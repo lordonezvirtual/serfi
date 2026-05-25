@@ -65,6 +65,18 @@
               [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Gestión de Canales</span>
       </a>
 
+      <!-- 3b. Alerts Dashboard -->
+      <a routerLink="/alerts" (click)="closeMobileMenu()"
+         routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"
+         class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-800 hover:text-white text-slate-400 group"
+         [ngClass]="{'justify-center': isSidebarCollapsed() && !isMobileMenuOpen(), 'space-x-3': !isSidebarCollapsed() || isMobileMenuOpen()}"
+         [title]="(isSidebarCollapsed() && !isMobileMenuOpen()) ? 'Monitoreo de Alertas' : ''">
+        <span class="text-lg shrink-0">🚨</span>
+        <span class="text-xs whitespace-nowrap overflow-hidden transition-all duration-300" 
+              [ngClass]="{'opacity-0 w-0 hidden': isSidebarCollapsed() && !isMobileMenuOpen()}">Monitoreo de Alertas</span>
+      </a>
+
+
       <!-- 4. Knowledge Base -->
       <a routerLink="/knowledge" (click)="closeMobileMenu()"
          routerLinkActive="bg-[#1E4D8C] text-white shadow-md font-bold"

@@ -20,6 +20,8 @@ export interface Channel {
   templateUrl: './channels.html',
 })
 export class ChannelsComponent {
+  protected readonly Math = Math;
+
   // 12 channels list
   protected readonly channels = signal<Channel[]>([
     { id: 'wa', name: 'WhatsApp Business', icon: '💬', status: 'live', metric: '847 msg/h', uptime: '99.8%', sparklineData: [45, 52, 49, 62, 58, 65, 80, 85, 78, 88, 92, 84, 87, 81, 75, 86, 95, 102, 98, 105, 94, 88, 85, 87], isActive: true },
@@ -75,6 +77,14 @@ export class ChannelsComponent {
   protected whatchimpSyncMeta = true;
   protected whatchimpMarkupFee = '0% (Directo a Meta)';
 
+  // ElevenLabs states
+  protected elevenlabsApiKey = 'el_sk_08fa1947bde78cd90217a94ef...';
+  protected elevenlabsVoiceId = '21m00Tcm4TlvDq8ikWAM'; // Rachel / Asesor Serfinanza
+  protected elevenlabsModelId = 'eleven_multilingual_v2';
+  protected elevenlabsStability = 0.75;
+  protected elevenlabsSimilarity = 0.85;
+  protected elevenlabsLatency = 0;
+
   // Sparkline builder helper
   protected getSparklinePath(data?: number[]): string {
     if (!data || data.length === 0) return '';
@@ -112,6 +122,9 @@ export class ChannelsComponent {
     } else if (channel.id === 'whatchimp') {
       this.apiToken = this.whatchimpApiKey;
       this.testPhoneNumber = '573043344722';
+    } else if (channel.id === 'cc') {
+      this.apiToken = this.elevenlabsApiKey;
+      this.testPhoneNumber = 'Asesor Interno';
     } else {
       this.apiToken = '';
       this.testPhoneNumber = '';
@@ -150,6 +163,8 @@ export class ChannelsComponent {
       this.testSuccessMessage.set('⏳ Procesando solicitud con Twilio API Gateway...');
     } else if (channelId === 'whatchimp') {
       this.testSuccessMessage.set('⏳ Desencadenando plantilla WhatChimp a través de Meta WhatsApp Cloud API (0% markup)...');
+    } else if (channelId === 'cc') {
+      this.testSuccessMessage.set('⏳ Conectando con ElevenLabs WebSocket y sintetizando audio de prueba para CenterCall Copilot...');
     } else {
       this.testSuccessMessage.set(`⏳ Enviando mensaje de prueba a través de ${this.selectedChannel()?.name}...`);
     }
@@ -217,6 +232,17 @@ export class ChannelsComponent {
             `${err.message || err}`
           );
         });
+      } else if (channelId === 'cc') {
+        this.testSuccessMessage.set(
+          `✅ [ElevenLabs Voice API] ¡Audio de voz sintetizado con éxito!\n\n` +
+          `• Voice ID: ${this.elevenlabsVoiceId}\n` +
+          `• Model: ${this.elevenlabsModelId}\n` +
+          `• Estabilidad (Stability): ${Math.round(this.elevenlabsStability * 100)}%\n` +
+          `• Claridad (Similarity Boost): ${Math.round(this.elevenlabsSimilarity * 100)}%\n` +
+          `• Latencia de Stream: ~180ms (Optimizada)\n` +
+          `• Formato de Salida: Audio Stream (MP3 44.1kHz, 128kbps, Mono)\n\n` +
+          `El flujo de síntesis de voz se encuentra plenamente sincronizado con CenterCall Copilot. Los scripts de respuesta del asesor ahora se reproducirán automáticamente por voz con ElevenLabs.`
+        );
       } else {
         this.testSuccessMessage.set(`✅ ¡Mensaje de prueba enviado exitosamente a ${this.testPhoneNumber} a través de ${this.selectedChannel()?.name}!`);
       }

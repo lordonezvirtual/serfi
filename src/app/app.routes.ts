@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadComponent: () => import('./views/channels/channels').then((m) => m.ChannelsComponent),
   },
   {
+    path: 'alerts',
+    loadComponent: () => import('./views/alerts/alerts').then((m) => m.AlertsComponent),
+  },
+  {
     path: 'knowledge',
     loadComponent: () => import('./views/knowledge/knowledge').then((m) => m.KnowledgeComponent),
   },

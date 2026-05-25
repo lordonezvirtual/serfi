@@ -327,11 +327,73 @@
                       {{ whatchimpMarkupFee }}
                     </span>
                   </div>
-                  <div class="flex items-center space-x-2 pt-1">
-                    <input type="checkbox" id="whatchimpSync" [(ngModel)]="whatchimpSyncMeta" class="rounded text-emerald-600 focus:ring-emerald-500 h-3.5 w-3.5" />
-                    <label for="whatchimpSync" class="text-3xs font-semibold text-slate-500 select-none">
-                      Sincronizar automáticamente plantillas con Meta Cloud
-                    </label>
+                </div>
+              </div>
+            }
+
+            <!-- Configuración Específica de CenterCall Copilot + ElevenLabs -->
+            @if (selectedChannel()?.id === 'cc') {
+              <div class="space-y-4 bg-indigo-50/45 p-4.5 rounded-xl border border-indigo-200/50">
+                <h4 class="text-xs font-black text-indigo-800 flex items-center space-x-2">
+                  <span>🎙️</span>
+                  <span class="uppercase tracking-wider text-2xs">Integración ElevenLabs Voice AI</span>
+                </h4>
+                <div class="space-y-3.5">
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">ElevenLabs API Key</label>
+                    <input type="password" [(ngModel)]="elevenlabsApiKey"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Voice ID (Voz del Asesor / Huella Vocal)</label>
+                    <select [(ngModel)]="elevenlabsVoiceId"
+                            class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-750 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                      <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Voz Femenina Estándar)</option>
+                      <option value="AZnzlk1XvdvUeBnXmlld">Domi (Voz Conversacional Clara)</option>
+                      <option value="EXAVITQu4vr4xnSDxMaL">Bella (Voz Empática Senior)</option>
+                      <option value="ErXwobaYiN019PkySvjV">Antoni (Voz Masculina Profesional)</option>
+                      <option value="maria_cloned_voice_v1">María Amparo (Huella Vocal Clonada - Seguridad)</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Model ID (Modelo de TTS)</label>
+                    <select [(ngModel)]="elevenlabsModelId"
+                            class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-750 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                      <option value="eleven_multilingual_v2">Eleven Multilingual v2 (Mejor Calidad y Acento)</option>
+                      <option value="eleven_turbo_v2">Eleven Turbo v2 (Ultra Baja Latencia ~150ms)</option>
+                      <option value="eleven_monolingual_v1">Eleven Monolingual v1 (Inglés únicamente)</option>
+                    </select>
+                  </div>
+
+                  <!-- Controles de Ajustes de Voz (Stability & Clarity) -->
+                  <div class="space-y-2 pt-2 border-t border-slate-100">
+                    <div class="flex justify-between items-center text-3xs font-extrabold text-slate-500 uppercase tracking-wider">
+                      <span>Estabilidad: {{ Math.round(elevenlabsStability * 100) }}%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.05" [(ngModel)]="elevenlabsStability"
+                           class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                    <p class="text-[9px] text-slate-400">Valores bajos dan más expresividad; altos dan mayor consistencia.</p>
+                  </div>
+
+                  <div class="space-y-2 pt-2 border-t border-slate-100">
+                    <div class="flex justify-between items-center text-3xs font-extrabold text-slate-500 uppercase tracking-wider">
+                      <span>Claridad (Similarity Boost): {{ Math.round(elevenlabsSimilarity * 100) }}%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.05" [(ngModel)]="elevenlabsSimilarity"
+                           class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                    <p class="text-[9px] text-slate-400">Aumenta la fidelidad al hablante original pero puede introducir artefactos.</p>
+                  </div>
+
+                  <div class="space-y-1 pt-2 border-t border-slate-100">
+                    <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Optimización de Latencia</label>
+                    <select [(ngModel)]="elevenlabsLatency"
+                            class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-750 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                      <option [value]="0">Sin optimización (Máxima calidad de audio)</option>
+                      <option [value]="1">Nivel 1 (Latencia reducida, calidad normal)</option>
+                      <option [value]="2">Nivel 2 (Baja latencia recomendada para llamadas en tiempo real)</option>
+                      <option [value]="3">Nivel 3 (Ultra baja latencia con ligero remuestreo)</option>
+                      <option [value]="4">Nivel 4 (Latencia crítica extrema - WebSocket fluido)</option>
+                    </select>
                   </div>
                 </div>
               </div>

@@ -452,6 +452,26 @@ export class MockDataService {
           })));
         }
       }
+
+      // 6. Sync Offers (Promotions)
+      const offersResponse = await fetch('http://localhost:3000/ofertas?order=prioridad.asc,id.desc');
+      if (offersResponse.ok) {
+        const offersData = await offersResponse.json();
+        if (Array.isArray(offersData) && offersData.length > 0) {
+          this.offers.set(offersData.map((o: any) => ({
+            id: o.id,
+            title: o.titulo,
+            description: o.descripcion,
+            targetSegment: o.segmento_objetivo,
+            channel: o.canal,
+            metricLabel: o.metrica_etiqueta || 'Conversión',
+            metricValue: o.metrica_valor || 'Alta',
+            isActive: !!o.esta_activa,
+            priority: o.prioridad,
+            triggerCondition: o.condicion_disparo || 'General'
+          })));
+        }
+      }
     } catch (e) {
       // Quietly fall back to mock data if PostgREST is not running
     }
@@ -476,7 +496,7 @@ export class MockDataService {
     // Initial sync with database
     this.syncWithPostgREST();
 
-    // Periodically pull live tasks from PostgREST if available
+    // Periodically pull live tasks and offers from PostgREST if available
     setInterval(() => {
       this.syncWithPostgREST();
     }, 2000); // Poll more frequently for snappiness
@@ -487,15 +507,49 @@ export class MockDataService {
   }
 
   // Toggle state of an offer
-  public toggleOffer(id: number) {
+  public async toggleOffer(id: number) {
     this.offers.update((items) =>
       items.map((offer) => (offer.id === id ? { ...offer, isActive: !offer.isActive } : offer))
     );
+    try {
+      const offer = this.offers().find(o => o.id === id);
+      if (offer) {
+        await fetch(`http://localhost:3000/ofertas?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            esta_activa: offer.isActive
+          })
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   // Add a new offer
-  public addOffer(offer: Offer) {
+  public async addOffer(offer: Offer) {
     this.offers.update((items) => [offer, ...items]);
+    try {
+      await fetch('http://localhost:3000/ofertas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo: offer.title,
+          descripcion: offer.description,
+          segmento_objetivo: offer.targetSegment,
+          canal: offer.channel,
+          metrica_etiqueta: offer.metricLabel,
+          metrica_valor: offer.metricValue,
+          esta_activa: offer.isActive,
+          prioridad: offer.priority,
+          condicion_disparo: offer.triggerCondition
+        })
+      });
+      this.syncWithPostgREST();
+    } catch (e) {
+      // ignore
+    }
   }
 
   // Add a new HITL task manually (e.g. from local fallback biometrics)

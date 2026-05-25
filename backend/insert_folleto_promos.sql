@@ -1,0 +1,47 @@
+-- ===========================================================================
+-- INSERTAR PROMOCIONES DEL FOLLETO OLÍMPICA
+-- Catálogo actual: Descuentos y ofertas exclusivas con Puntos Olímpica
+-- ===========================================================================
+
+INSERT INTO api.ofertas (titulo, descripcion, segmento_objetivo, canal, metrica_etiqueta, metrica_valor, esta_activa, prioridad, condicion_disparo) VALUES
+-- --- IMAGEN 1: ALIMENTOS, LÁCTEOS Y COMIDA PREPARADA ---
+('Aceite MEDALLA DE ORO (1.000 ml + 900 ml) a $19.990', 'Lleva Aceite Medalla de Oro vegetal de 1.000 ml + 900 ml por solo $19.990 COP con Puntos Olímpica. Ahorro de $6.666 COP.', 'Canasta Básica', 'WhatsApp', 'Ahorro Puntos', '$6.666', TRUE, 2, 'Puntos Olímpica'),
+('Papas francesas MEDALLA DE ORO 1.000g a $8.990', 'Compra papas francesas Medalla de Oro congeladas de 1.000 g por solo $8.990 COP con Puntos Olímpica. Ahorro de $8.991 COP.', 'Canasta Básica', 'WhatsApp', 'Ahorro Puntos', '$8.991', TRUE, 2, 'Puntos Olímpica'),
+('Café SELLO ROJO 400g a $22.990', 'Disfruta de Café Sello Rojo x 400 g por solo $22.990 COP pagando con Puntos Olímpica. Ahorro de $540 COP.', 'Canasta Básica', 'WhatsApp', 'Ahorro Puntos', '$540', TRUE, 2, 'Puntos Olímpica'),
+('20% Dcto en Aceites PREMIER y CANOLA LIFE', 'Aprovecha un 20% de descuento en aceites Premier y Canola Life con Puntos Olímpica.', 'Canasta Básica', 'WhatsApp', 'Descuento', '20%', TRUE, 2, 'Puntos Olímpica'),
+('20% Dcto en Atún VAN CAMP''S (paq. x 3)', 'Lleva el paquete de Atún Van Camp''s x 3 unidades con un 20% de descuento exclusivo usando Puntos Olímpica.', 'Canasta Básica', 'WhatsApp', 'Descuento', '20%', TRUE, 2, 'Puntos Olímpica'),
+('25% Dcto en Leche achocolatada MILO', 'Consiente a tu familia con un 25% de descuento en leche achocolatada Milo con Puntos Olímpica.', 'Todos', 'WhatsApp, Telegram', 'Descuento', '25%', TRUE, 2, 'Puntos Olímpica'),
+('Leche UHT OLÍMPICA x 900ml a $15.990 c/paq.', 'Compra Leche UHT entera o deslactosada Olímpica c/u x 900 ml por solo $15.990 COP el paquete con Puntos Olímpica. Ahorro de $3.331 COP.', 'Canasta Básica', 'WhatsApp', 'Ahorro Puntos', '$3.331', TRUE, 2, 'Puntos Olímpica'),
+('20% Dcto en Quesos tipo mozzarella VÍA LIFE', 'Obtén 20% de descuento en quesos tipo mozzarella Vía Life pagando con Puntos Olímpica.', 'Canasta Básica', 'WhatsApp', 'Descuento', '20%', TRUE, 2, 'Puntos Olímpica'),
+('20% Dcto en Lácteos ALQUEMIX, ALQUERÍA, YITAD y ACTIGEST', 'Aprovecha un 20% de descuento en yogures y bebidas lácteas seleccionadas con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Descuento', '20%', TRUE, 2, 'Puntos Olímpica'),
+('20% Dcto en Jamones y Quesos COLANTA', 'Disfruta de un 20% de descuento en la línea de quesos y jamones Colanta con Puntos Olímpica.', 'Canasta Básica', 'WhatsApp', 'Descuento', '20%', TRUE, 2, 'Puntos Olímpica'),
+('25% Dcto en Mantequillas y Arepas COLANTA', 'Lleva mantequillas y arepas Colanta con un 25% de descuento exclusivo usando Puntos Olímpica.', 'Canasta Básica', 'WhatsApp', 'Descuento', '25%', TRUE, 2, 'Puntos Olímpica'),
+('20% Dcto en Tortillas HAZ DE OROS', 'Prepara tus mejores recetas con un 20% de descuento en tortillas Haz de Oros con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Descuento', '20%', TRUE, 2, 'Puntos Olímpica'),
+('25% Dcto en Salchichas ZENÚ, PIETRÁN, CUNIT y RICA', 'Compra salchichas Zenú, Pietrán, Cunit y Rica con un 25% de descuento exclusivo pagando con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Descuento', '25%', TRUE, 2, 'Puntos Olímpica'),
+('25% Dcto en Sueros KLAREN''S', 'Obtén un 25% de descuento en sueros Klaren''s pagando con Puntos Olímpica.', 'Canasta Básica', 'WhatsApp', 'Descuento', '25%', TRUE, 2, 'Puntos Olímpica'),
+('30% Dcto en Jamones CASABLANCA', 'Lleva jamones Casablanca premium con un 30% de descuento exclusivo con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Descuento', '30%', TRUE, 2, 'Puntos Olímpica'),
+('25% Dcto en Suero Costeño LOS CAMARONES / LOS CAMPEONATOS', 'Aprovecha un 25% de descuento en suero costeño Los Camarones o Los Campeonatos usando Puntos Olímpica.', 'Canasta Básica', 'WhatsApp', 'Descuento', '25%', TRUE, 2, 'Puntos Olímpica'),
+('Combo Pastelito de Hojaldre + Refresco HIT a $4.500', 'Disfruta de un pastelito de hojaldre de pollo o res + refresco HIT de 250ml por solo $4.500 COP el combo con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Precio Especial', '$4.500', TRUE, 3, 'Puntos Olímpica'),
+('Menú Lomo de Cerdo en salsa de uchuva a $25.000', 'Almuerza delicioso con nuestro Menú lomo de cerdo en salsa de uchuva por solo $25.000 COP con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Precio Especial', '$25.000', TRUE, 3, 'Puntos Olímpica'),
+('Lasaña mixta/pollo/carne a $15.900 c/u', 'Lleva nuestras deliciosas lasañas preparadas por solo $15.900 COP c/u con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Precio Especial', '$15.900', TRUE, 3, 'Puntos Olímpica'),
+('Combo Salmón Mediterráneo a $33.900', 'Disfruta de un exquisito Combo de Salmón Mediterráneo preparado por solo $33.900 COP con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Precio Especial', '$33.900', TRUE, 3, 'Puntos Olímpica'),
+('Menú Chuleta de Cerdo a $25.000', 'Prueba nuestro Menú chuleta de cerdo por solo $25.000 COP pagando con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Precio Especial', '$25.000', TRUE, 3, 'Puntos Olímpica'),
+('Menú Pechuga Rellena en salsa de champiñones a $25.000', 'Deléitate con el Menú pechuga rellena en salsa de champiñones por solo $25.000 COP con Puntos Olímpica.', 'Todos', 'WhatsApp', 'Precio Especial', '$25.000', TRUE, 3, 'Puntos Olímpica'),
+
+-- --- IMAGEN 2: LICORES, BEBIDAS, ASEO Y TECNOLOGÍA ---
+('20% Dcto en Margarina CANOLA LIFE', 'Lleva Margarina Canola Life en tarrina con un 20% de descuento con Puntos Olímpica.', 'Canasta Básica', 'WhatsApp', 'Descuento', '20%', TRUE, 2, 'Puntos Olímpica'),
+('40% Dcto en Segunda Unidad de Bebidas HATSU', 'Compra una bebida refrescante Hatsu y lleva la segunda con un 40% de descuento en Olímpica.', 'Todos', 'WhatsApp', 'Segunda Unidad', '40%', TRUE, 2, 'Segunda Unidad'),
+('40% Dcto en Whisky SCOTTISH FOX y THE HIGHLAND SUPREME', 'Aprovecha un 40% de descuento en Whisky Scottish Fox y The Highland Supreme con Puntos Olímpica.', 'Licores y Bebidas', 'WhatsApp', 'Descuento', '40%', TRUE, 2, 'Puntos Olímpica'),
+('25% Dcto en Cervezas en lata HEINEKEN', 'Lleva pack de cervezas en lata Heineken con 25% de descuento pagando con Puntos Olímpica.', 'Licores y Bebidas', 'WhatsApp, Telegram', 'Descuento', '25%', TRUE, 2, 'Puntos Olímpica'),
+('50% Dcto en Segunda Unidad de Refrescos HIT', 'Refrescate con 50% de descuento en la segunda unidad de refrescos HIT seleccionados.', 'Todos', 'WhatsApp', 'Segunda Unidad', '50%', TRUE, 2, 'Segunda Unidad'),
+('Crema dental COLGATE Triple Acción (paq. x 3) a $26.490', 'Lleva paquete de Crema dental Colgate Triple Acción x 3 unidades por solo $26.490 COP con Puntos Olímpica.', 'Aseo y Cuidado Personal', 'WhatsApp', 'Precio Especial', '$26.490', TRUE, 2, 'Puntos Olímpica'),
+('Crema dental COLGATE Total (paq. x 3) a $25.990', 'Compra el paquete de Crema dental Colgate Total x 3 unidades por solo $25.990 COP con Puntos Olímpica.', 'Aseo y Cuidado Personal', 'WhatsApp', 'Precio Especial', '$25.990', TRUE, 2, 'Puntos Olímpica'),
+('Jabones PROTEX (barra x 6) a $16.990 / $17.290', 'Mantén limpia tu piel con jabones Protex barra x 6 unidades desde $16.990 COP con Puntos Olímpica.', 'Aseo y Cuidado Personal', 'WhatsApp', 'Precio Especial', '$16.990', TRUE, 2, 'Puntos Olímpica'),
+('Jabones de baño OLÍMPICA (paq. x 3) a $4.990', 'Ahorra llevando el paquete de Jabones de baño marca Olímpica x 3 unidades por solo $4.990 COP c/paq. con Puntos Olímpica.', 'Aseo y Cuidado Personal', 'WhatsApp', 'Precio Especial', '$4.990', TRUE, 2, 'Puntos Olímpica'),
+('Suavizante SUAVITEL 2.8L a $38.990', 'Lleva Suavizante Suavitel de 2.8 L por solo $38.990 COP con Puntos Olímpica. Ahorro de $6.901 COP.', 'Aseo y Cuidado Personal', 'WhatsApp', 'Ahorro Puntos', '$6.901', TRUE, 2, 'Puntos Olímpica'),
+('20% Dcto en Desmanchadores VANISH', 'Elimina las manchas más difíciles con un 20% de descuento en Vanish con Puntos Olímpica.', 'Aseo y Cuidado Personal', 'WhatsApp', 'Descuento', '20%', TRUE, 2, 'Puntos Olímpica'),
+('25% Dcto en Detergente líquido PERSIL y MAS COLOR', 'Mantén tus prendas impecables con un 25% de descuento en detergente líquido Persil y Mas Color usando Puntos Olímpica.', 'Aseo y Cuidado Personal', 'WhatsApp', 'Descuento', '25%', TRUE, 2, 'Puntos Olímpica'),
+('Papel Higiénico SUPRA CARE (8 rollos) a $7.990', 'Compra Papel Higiénico triple hoja Supra Care de 8 rollos por solo $7.990 COP con Puntos Olímpica. Ahorro de $3.567 COP.', 'Aseo y Cuidado Personal', 'WhatsApp', 'Ahorro Puntos', '$3.567', TRUE, 2, 'Puntos Olímpica'),
+('Hasta 50% en TV OLIMPO/CAIXUN y Portátiles LENOVO', 'Renueva tus pantallas y equipos informáticos con hasta 50% de descuento con Puntos Olímpica.', 'Tecnología y Hogar', 'WhatsApp, Telegram', 'Descuento Máximo', 'Hasta 50%', TRUE, 1, 'Puntos Olímpica'),
+('Ventilador mini LED de techo H&H a $49.900', 'Refresca tu espacio con el Ventilador mini LED de techo H&H por solo $49.900 COP con Puntos Olímpica.', 'Tecnología y Hogar', 'WhatsApp', 'Precio Especial', '$49.900', TRUE, 2, 'Puntos Olímpica'),
+('Ventilador LED de techo H&H a $29.900', 'Lleva el Ventilador LED de techo H&H por solo $29.900 COP con Puntos Olímpica.', 'Tecnología y Hogar', 'WhatsApp', 'Precio Especial', '$29.900', TRUE, 2, 'Puntos Olímpica');

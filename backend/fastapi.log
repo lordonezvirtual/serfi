@@ -1,0 +1,19 @@
+nohup: no se tendrá en cuenta la entrada
+INFO:     Will watch for changes in these directories: ['/home/openclaw/Documentos/antigra/serfinanza']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [15473] using WatchFiles
+Banco Serfinanza — Iniciando Servidor de Agentes en http://localhost:8000
+INFO:     Started server process [15506]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🚀 ÉXITO: Conectado a la API real de OpenAI utilizando el modelo: gpt-4o-mini
+DatabaseService: Iniciado exitosamente en modo [PostgreSQL]
+INFO:     127.0.0.1:57080 - "OPTIONS /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57084 - "POST /api/chat HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:58286 - "OPTIONS /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58300 - "POST /api/chat HTTP/1.1" 500 Internal Server Error
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [15506]
+INFO:     Stopping reloader process [15473]
